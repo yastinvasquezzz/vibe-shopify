@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../store/useStore';
 import { supabase } from '../../lib/supabaseClient';
@@ -19,6 +19,7 @@ export const AuthPage = () => {
   const [remember, setRemember] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [registerSuccess, setRegisterSuccess] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -29,6 +30,13 @@ export const AuthPage = () => {
   const [regConfirm, setRegConfirm] = useState('');
 
   const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
 
 
@@ -57,7 +65,10 @@ export const AuthPage = () => {
       });
 
       if (error || !data.user) {
-        setErrors({ email: error?.message || 'Error al iniciar sesión' });
+        const msg = error?.message === 'Invalid login credentials'
+          ? 'Correo electrónico o contraseña incorrectos. Por favor, verifica tus datos.'
+          : (error?.message || 'Error al iniciar sesión');
+        setToast({ message: msg, type: 'error' });
         return;
       }
 
@@ -76,7 +87,7 @@ export const AuthPage = () => {
       setActiveView('home');
     } catch (err: any) {
       console.error('Error during login:', err);
-      setErrors({ email: err.message || 'Error al conectar con el servidor' });
+      setToast({ message: err.message || 'Error al conectar con el servidor', type: 'error' });
     }
   };
 
@@ -114,7 +125,7 @@ export const AuthPage = () => {
       if (checkError) throw checkError;
 
       if (existingUser) {
-        setErrors({ email: 'Este correo electrónico ya está registrado' });
+        setToast({ message: 'Este correo electrónico ya está registrado', type: 'error' });
         return;
       }
 
@@ -136,7 +147,7 @@ export const AuthPage = () => {
       });
 
       if (error || !data.user) {
-        setErrors({ email: error?.message || 'Error al registrar la cuenta' });
+        setToast({ message: error?.message || 'Error al registrar la cuenta', type: 'error' });
         return;
       }
 
@@ -160,7 +171,7 @@ export const AuthPage = () => {
       setActiveView('home');
     } catch (err: any) {
       console.error('Error during register:', err);
-      setErrors({ email: err.message || 'Error al registrar la cuenta' });
+      setToast({ message: err.message || 'Error al registrar la cuenta', type: 'error' });
     }
   };
 
@@ -216,7 +227,35 @@ export const AuthPage = () => {
 
   {/* --- SECTION: AUTH_FORMS --- */}
   return (
-    <div className="min-h-screen bg-[#030303] flex items-center justify-center px-4 py-20">
+    <div className="min-h-screen bg-[#030303] flex items-center justify-center px-4 py-20 relative">
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4"
+          >
+            <div className="glass border border-red-500/20 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-3 bg-zinc-950/90 backdrop-blur-xl">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center shrink-0">
+                  ✕
+                </div>
+                <p className="text-xs font-semibold text-zinc-200 leading-relaxed">{toast.message}</p>
+              </div>
+              <button 
+                type="button"
+                onClick={() => setToast(null)}
+                className="text-[10px] font-bold text-zinc-500 hover:text-white uppercase tracking-wider shrink-0"
+              >
+                Cerrar
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -376,14 +415,6 @@ export const AuthPage = () => {
               >
                 Iniciar Sesión
               </button>
-
-
-
-              <div className="pt-4 border-t border-zinc-900 text-center">
-                <p className="text-[10px] text-zinc-500 leading-relaxed font-semibold uppercase tracking-wider">
-                  💡 Tip: Usa el correo <span className="text-accent-400 font-mono">admin@vibe.shop</span> para iniciar sesión con privilegios de Administrador.
-                </p>
-              </div>
             </motion.form>
           ) : (
             <motion.form
