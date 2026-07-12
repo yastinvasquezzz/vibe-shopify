@@ -39,10 +39,24 @@ CREATE TABLE IF NOT EXISTS coupons (
   active BOOLEAN NOT NULL
 );
 
+-- 4. Crear tabla de usuarios
+CREATE TABLE IF NOT EXISTS users (
+  email TEXT PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  password TEXT NOT NULL,
+  phone TEXT,
+  address TEXT,
+  city TEXT,
+  postal_code TEXT,
+  country TEXT,
+  role TEXT DEFAULT 'customer'
+);
+
 -- Desactivar Row Level Security (RLS) para permitir acceso de lectura/escritura directo
 ALTER TABLE products DISABLE ROW LEVEL SECURITY;
 ALTER TABLE orders DISABLE ROW LEVEL SECURITY;
 ALTER TABLE coupons DISABLE ROW LEVEL SECURITY;
+ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 
 -- Insertar cupones por defecto
 INSERT INTO coupons (code, discount_rate, active)
@@ -51,3 +65,8 @@ VALUES
   ('SHOPIFY10', 0.10, true),
   ('FREESHIP', 0.00, true)
 ON CONFLICT (code) DO NOTHING;
+
+-- Insertar administrador por defecto
+INSERT INTO users (email, full_name, password, role)
+VALUES ('admin@vibe.shop', 'Administrador Vibe', 'admin123', 'admin')
+ON CONFLICT (email) DO NOTHING;

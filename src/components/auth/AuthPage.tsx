@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../store/useStore';
+import { supabase } from '../../lib/supabaseClient';
 
 type AuthTab = 'login' | 'register';
 
@@ -28,7 +29,7 @@ export const AuthPage = () => {
 
   const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: ValidationErrors = {};
 
@@ -45,18 +46,43 @@ export const AuthPage = () => {
     }
 
     setErrors({});
-    const isAdmin = loginEmail.toLowerCase().includes('admin');
-    updateUser({
-      ...user,
-      fullName: isAdmin ? 'Administrador Vibe' : 'Javier Vasquez',
-      email: loginEmail,
-      role: isAdmin ? 'admin' : 'customer'
-    });
-    login();
-    setActiveView('home');
+    
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', loginEmail)
+        .maybeSingle();
+
+      if (error || !data) {
+        setErrors({ email: 'El correo electrónico no está registrado' });
+        return;
+      }
+
+      if (data.password !== loginPassword) {
+        setErrors({ password: 'La contraseña es incorrecta' });
+        return;
+      }
+
+      updateUser({
+        fullName: data.full_name,
+        email: data.email,
+        phone: data.phone || '',
+        address: data.address || '',
+        city: data.city || '',
+        postalCode: data.postal_code || '',
+        country: data.country || '',
+        role: (data.role as 'admin' | 'customer') || 'customer'
+      });
+      login();
+      setActiveView('home');
+    } catch (err) {
+      console.error('Error during login:', err);
+      setErrors({ email: 'Error al conectar con el servidor' });
+    }
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: ValidationErrors = {};
 
@@ -79,15 +105,54 @@ export const AuthPage = () => {
     }
 
     setErrors({});
-    const isAdmin = regEmail.toLowerCase().includes('admin');
-    updateUser({
-      ...user,
-      fullName: regName,
-      email: regEmail,
-      role: isAdmin ? 'admin' : 'customer'
-    });
-    login();
-    setActiveView('home');
+
+    try {
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('email')
+        .eq('email', regEmail)
+        .maybeSingle();
+
+      if (existingUser) {
+        setErrors({ email: 'Este correo electrónico ya está registrado' });
+        return;
+      }
+
+      const isAdmin = regEmail.toLowerCase().includes('admin');
+      const newUser = {
+        email: regEmail,
+        full_name: regName,
+        password: regPassword,
+        phone: '',
+        address: '',
+        city: '',
+        postal_code: '',
+        country: '',
+        role: (isAdmin ? 'admin' : 'customer') as 'admin' | 'customer'
+      };
+
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert(newUser);
+
+      if (insertError) throw insertError;
+
+      updateUser({
+        fullName: newUser.full_name,
+        email: newUser.email,
+        phone: newUser.phone,
+        address: newUser.address,
+        city: newUser.city,
+        postalCode: newUser.postal_code,
+        country: newUser.country,
+        role: newUser.role as 'admin' | 'customer'
+      });
+      login();
+      setActiveView('home');
+    } catch (err) {
+      console.error('Error during register:', err);
+      setErrors({ email: 'Error al registrar la cuenta' });
+    }
   };
 
   const tabVariants = {
