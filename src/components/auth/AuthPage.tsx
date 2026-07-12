@@ -48,37 +48,32 @@ export const AuthPage = () => {
     setErrors({});
     
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('email', loginEmail)
-        .maybeSingle();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword
+      });
 
-      if (error || !data) {
-        setErrors({ email: 'El correo electrónico no está registrado' });
+      if (error || !data.user) {
+        setErrors({ email: error?.message || 'Error al iniciar sesión' });
         return;
       }
 
-      if (data.password !== loginPassword) {
-        setErrors({ password: 'La contraseña es incorrecta' });
-        return;
-      }
-
+      const profile = data.user;
       updateUser({
-        fullName: data.full_name,
-        email: data.email,
-        phone: data.phone || '',
-        address: data.address || '',
-        city: data.city || '',
-        postalCode: data.postal_code || '',
-        country: data.country || '',
-        role: (data.role as 'admin' | 'customer') || 'customer'
+        fullName: profile.user_metadata.full_name || 'Usuario Vibe',
+        email: profile.email || '',
+        phone: profile.user_metadata.phone || '',
+        address: profile.user_metadata.address || '',
+        city: profile.user_metadata.city || '',
+        postalCode: profile.user_metadata.postal_code || '',
+        country: profile.user_metadata.country || '',
+        role: (profile.user_metadata.role as 'admin' | 'customer') || 'customer'
       });
       login();
       setActiveView('home');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error during login:', err);
-      setErrors({ email: 'Error al conectar con el servidor' });
+      setErrors({ email: err.message || 'Error al conectar con el servidor' });
     }
   };
 
@@ -107,51 +102,44 @@ export const AuthPage = () => {
     setErrors({});
 
     try {
-      const { data: existingUser } = await supabase
-        .from('users')
-        .select('email')
-        .eq('email', regEmail)
-        .maybeSingle();
+      const isAdmin = regEmail.toLowerCase().includes('admin');
+      const { data, error } = await supabase.auth.signUp({
+        email: regEmail,
+        password: regPassword,
+        options: {
+          data: {
+            full_name: regName,
+            role: isAdmin ? 'admin' : 'customer',
+            phone: '',
+            address: '',
+            city: '',
+            postal_code: '',
+            country: ''
+          }
+        }
+      });
 
-      if (existingUser) {
-        setErrors({ email: 'Este correo electrónico ya está registrado' });
+      if (error || !data.user) {
+        setErrors({ email: error?.message || 'Error al registrar la cuenta' });
         return;
       }
 
-      const isAdmin = regEmail.toLowerCase().includes('admin');
-      const newUser = {
-        email: regEmail,
-        full_name: regName,
-        password: regPassword,
-        phone: '',
-        address: '',
-        city: '',
-        postal_code: '',
-        country: '',
-        role: (isAdmin ? 'admin' : 'customer') as 'admin' | 'customer'
-      };
-
-      const { error: insertError } = await supabase
-        .from('users')
-        .insert(newUser);
-
-      if (insertError) throw insertError;
-
+      const profile = data.user;
       updateUser({
-        fullName: newUser.full_name,
-        email: newUser.email,
-        phone: newUser.phone,
-        address: newUser.address,
-        city: newUser.city,
-        postalCode: newUser.postal_code,
-        country: newUser.country,
-        role: newUser.role as 'admin' | 'customer'
+        fullName: profile.user_metadata.full_name,
+        email: profile.email || '',
+        phone: profile.user_metadata.phone || '',
+        address: profile.user_metadata.address || '',
+        city: profile.user_metadata.city || '',
+        postalCode: profile.user_metadata.postal_code || '',
+        country: profile.user_metadata.country || '',
+        role: (profile.user_metadata.role as 'admin' | 'customer') || 'customer'
       });
       login();
       setActiveView('home');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error during register:', err);
-      setErrors({ email: 'Error al registrar la cuenta' });
+      setErrors({ email: err.message || 'Error al registrar la cuenta' });
     }
   };
 

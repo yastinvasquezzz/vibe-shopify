@@ -100,6 +100,7 @@ interface StoreState {
   fetchProducts: () => Promise<void>;
   fetchCoupons: () => Promise<void>;
   fetchOrders: () => Promise<void>;
+  checkSession: () => Promise<void>;
 }
 
 export const useStore = create<StoreState>()(
@@ -572,7 +573,34 @@ export const useStore = create<StoreState>()(
   }),
 
       login: () => set({ isLoggedIn: true }),
-      logout: () => set({ isLoggedIn: false, user: mockUser }),
+      logout: () => {
+        set({ isLoggedIn: false, user: mockUser });
+        supabase.auth.signOut().catch(err => console.error('Signout error:', err));
+      },
+
+      checkSession: async () => {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data.session && data.session.user) {
+            const profile = data.session.user;
+            set({
+              isLoggedIn: true,
+              user: {
+                fullName: profile.user_metadata.full_name || 'Usuario Vibe',
+                email: profile.email || '',
+                phone: profile.user_metadata.phone || '',
+                address: profile.user_metadata.address || '',
+                city: profile.user_metadata.city || '',
+                postalCode: profile.user_metadata.postal_code || '',
+                country: profile.user_metadata.country || '',
+                role: (profile.user_metadata.role as 'admin' | 'customer') || 'customer'
+              }
+            });
+          }
+        } catch (err) {
+          console.error('Error checking Supabase session:', err);
+        }
+      },
 
       fetchProducts: async () => {
         try {
