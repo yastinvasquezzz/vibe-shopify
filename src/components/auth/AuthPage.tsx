@@ -30,20 +30,7 @@ export const AuthPage = () => {
 
   const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleGoogleLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-      if (error) throw error;
-    } catch (err: any) {
-      console.error('Error starting Google OAuth:', err);
-      setErrors({ email: err.message || 'Error al conectar con Google' });
-    }
-  };
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -377,24 +364,7 @@ export const AuthPage = () => {
                 Iniciar Sesión
               </button>
 
-              {/* Divider */}
-              <div className="flex items-center gap-3 py-2">
-                <div className="h-px bg-zinc-800 flex-1" />
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">o</span>
-                <div className="h-px bg-zinc-800 flex-1" />
-              </div>
 
-              {/* Google OAuth Button */}
-              <button
-                type="button"
-                onClick={handleGoogleLogin}
-                className="w-full py-3.5 rounded-xl bg-white text-zinc-950 hover:bg-zinc-100 font-bold text-sm tracking-tight transition-all duration-200 flex items-center justify-center gap-2 hover:shadow-lg"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114-3.478 0-6.3-2.822-6.3-6.3 0-3.478 2.822-6.3 6.3-6.3 1.63 0 3.11.618 4.24 1.625l3.056-3.056C19.14 2.502 15.9 1 12.24 1 6.03 1 12.24s5.03 11.24 11.24 11.24c5.895 0 10.865-4.247 10.865-11.24 0-.768-.068-1.509-.196-1.955H12.24z"/>
-                </svg>
-                <span>Iniciar con Google</span>
-              </button>
 
               <div className="pt-4 border-t border-zinc-900 text-center">
                 <p className="text-[10px] text-zinc-500 leading-relaxed font-semibold uppercase tracking-wider">
