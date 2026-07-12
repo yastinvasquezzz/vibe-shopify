@@ -153,11 +153,11 @@ export const WishlistPage: React.FC = () => {
                 <div className="flex items-end justify-between">
                   <div>
                     <span className="text-lg font-extrabold text-white">
-                      ${product.price}
+                      S/. {product.price}
                     </span>
                     {product.originalPrice && (
                       <span className="text-xs text-zinc-600 line-through ml-2 font-medium">
-                        ${product.originalPrice}
+                        S/. {product.originalPrice}
                       </span>
                     )}
                   </div>

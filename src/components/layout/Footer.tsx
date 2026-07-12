@@ -139,7 +139,7 @@ export const Footer: React.FC = () => {
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-lg p-2 text-xs text-zinc-300 w-fit select-none">
               <Globe size={14} className="text-zinc-500" />
-              <span>Español / USD ($)</span>
+              <span>Español / PEN (S/.)</span>
             </div>
             <div className="flex items-center gap-1.5 text-zinc-500 mt-2">
               <CreditCard size={14} />

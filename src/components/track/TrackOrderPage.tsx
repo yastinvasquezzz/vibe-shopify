@@ -76,7 +76,7 @@ export const TrackOrderPage: React.FC = () => {
                     </div>
                     <div className="text-right">
                       <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Costo total</span>
-                      <div className="text-sm font-bold text-white">${matchedOrder.total} USD</div>
+                      <div className="text-sm font-bold text-white">S/. {matchedOrder.total}</div>
                     </div>
                   </div>
 

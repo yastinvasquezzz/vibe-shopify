@@ -80,7 +80,7 @@ export const CollectionsPage: React.FC = () => {
                 </div>
                 <div className="space-y-0.5">
                   <h4 className="text-[11px] font-semibold text-zinc-300 group-hover:text-white line-clamp-1 truncate">{p.name}</h4>
-                  <span className="text-xs font-bold text-white block">${p.price}</span>
+                  <span className="text-xs font-bold text-white block">S/. {p.price}</span>
                 </div>
               </div>
             ))}

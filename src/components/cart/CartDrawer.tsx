@@ -185,7 +185,7 @@ export const CartDrawer: React.FC = () => {
                                 <Plus size={10} />
                               </button>
                             </div>
-                            <span className="text-sm font-bold text-white">${item.product.price * item.quantity}</span>
+                             <span className="text-sm font-bold text-white">S/. {item.product.price * item.quantity}</span>
                           </div>
                         </div>
                       </motion.div>
@@ -241,7 +241,7 @@ export const CartDrawer: React.FC = () => {
                 <div className="space-y-2 pt-2 text-xs">
                   <div className="flex justify-between text-zinc-500 font-medium">
                     <span>Subtotal</span>
-                    <span className="text-zinc-300 font-semibold">${cartSubtotal.toFixed(2)}</span>
+                    <span className="text-zinc-300 font-semibold">S/. {cartSubtotal.toFixed(2)}</span>
                   </div>
 
                   {discountRate > 0 && (
@@ -250,7 +250,7 @@ export const CartDrawer: React.FC = () => {
                         <Tag size={12} />
                         Descuento ({couponCode})
                       </span>
-                      <span className="text-emerald-500 font-bold">-${discountAmount.toFixed(2)}</span>
+                      <span className="text-emerald-500 font-bold">-S/. {discountAmount.toFixed(2)}</span>
                     </div>
                   )}
 
@@ -266,8 +266,8 @@ export const CartDrawer: React.FC = () => {
                   </div>
 
                   <div className="flex justify-between text-sm font-bold pt-2 border-t border-zinc-900 text-white">
-                    <span>Total Estimado</span>
-                    <span className="text-accent-400">${total.toFixed(2)} USD</span>
+                     <span>Total Estimado</span>
+                    <span className="text-accent-400">S/. {total.toFixed(2)}</span>
                   </div>
                 </div>
 

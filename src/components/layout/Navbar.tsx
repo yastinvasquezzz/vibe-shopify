@@ -68,7 +68,7 @@ export const Navbar: React.FC = () => {
       {/* --- SECTION: PROMO BAR --- */}
       <div className="bg-gradient-to-r from-accent-700 via-accent-600 to-accent-800 py-2 px-4 text-center text-xs font-semibold tracking-wider text-white select-none">
         <span className="inline-flex items-center gap-1.5">
-          🎉 ENVÍO GRATIS EN PEDIDOS SUPERIORES A $150 USD | USA EL CÓDIGO <span className="underline decoration-wavy">VIBE20</span> PARA 20% OFF
+          🎉 ENVÍO GRATIS EN PEDIDOS SUPERIORES A S/. 500 | USA EL CÓDIGO <span className="underline decoration-wavy">VIBE20</span> PARA 20% OFF
         </span>
       </div>
 
@@ -164,7 +164,7 @@ export const Navbar: React.FC = () => {
                         <div className="text-xs font-semibold text-zinc-200 truncate">{product.name}</div>
                         <div className="text-[10px] text-zinc-500 font-medium">{product.category}</div>
                       </div>
-                      <div className="text-xs font-bold text-accent-400 pr-1">${product.price}</div>
+                      <div className="text-xs font-bold text-accent-400 pr-1">S/. {product.price}</div>
                     </div>
                   ))}
                 </motion.div>

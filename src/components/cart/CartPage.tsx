@@ -141,8 +141,8 @@ export const CartPage: React.FC = () => {
                         </button>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm font-extrabold text-white">${item.product.price * item.quantity} USD</span>
-                        <div className="text-[10px] text-zinc-550 font-medium mt-0.5">${item.product.price} c/u</div>
+                        <span className="text-sm font-extrabold text-white">S/. {item.product.price * item.quantity}</span>
+                        <div className="text-[10px] text-zinc-550 font-medium mt-0.5">S/. {item.product.price} c/u</div>
                       </div>
                     </div>
                   </div>
@@ -161,7 +161,7 @@ export const CartPage: React.FC = () => {
             <div className="space-y-3 text-xs">
               <div className="flex justify-between text-zinc-500">
                 <span>Subtotal</span>
-                <span className="text-zinc-300 font-semibold">${cartSubtotal.toFixed(2)}</span>
+                <span className="text-zinc-300 font-semibold">S/. {cartSubtotal.toFixed(2)}</span>
               </div>
 
               {discountRate > 0 && (
@@ -169,7 +169,7 @@ export const CartPage: React.FC = () => {
                   <span className="text-emerald-500 font-bold flex items-center gap-1">
                     <Tag size={12} /> Descuento ({couponCode})
                   </span>
-                  <span className="text-emerald-500 font-bold">-${discountAmount.toFixed(2)}</span>
+                  <span className="text-emerald-500 font-bold">-S/. {discountAmount.toFixed(2)}</span>
                 </div>
               )}
 
@@ -179,19 +179,19 @@ export const CartPage: React.FC = () => {
                   {isFreeShipping ? (
                     <span className="text-emerald-500 font-bold">Gratis</span>
                   ) : (
-                    `$${shippingCost.toFixed(2)}`
+                    `S/. ${shippingCost.toFixed(2)}`
                   )}
                 </span>
               </div>
 
               <div className="flex justify-between text-zinc-500">
                 <span>Impuestos (18% IGV)</span>
-                <span className="text-zinc-300 font-semibold">${tax.toFixed(2)}</span>
+                <span className="text-zinc-300 font-semibold">S/. {tax.toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between text-sm font-bold pt-3 border-t border-zinc-900 text-white">
                 <span>Total Estimado</span>
-                <span className="text-accent-400">${finalTotal.toFixed(2)} USD</span>
+                <span className="text-accent-400">S/. {finalTotal.toFixed(2)}</span>
               </div>
             </div>
 
@@ -263,8 +263,8 @@ export const CartPage: React.FC = () => {
                 <div className="space-y-1">
                   <h4 className="text-xs font-semibold text-zinc-300 group-hover:text-white line-clamp-1 truncate">{p.name}</h4>
                   <div className="flex justify-between items-center pt-1">
-                    <span className="text-sm font-bold text-white">${p.price}</span>
-                    <span className="text-[10px] text-zinc-500 font-medium flex items-center gap-0.5">
+                    <span className="text-sm font-bold text-white">S/. {p.price}</span>
+                    <span className="text-[10px] text-zinc-555 font-medium flex items-center gap-0.5">
                       Ver <ArrowUpRight size={10} />
                     </span>
                   </div>

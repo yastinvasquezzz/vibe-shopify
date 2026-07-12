@@ -95,7 +95,7 @@ export const QuickViewModal: React.FC = () => {
                 <span className="text-zinc-500 font-medium">({product.reviewCount} opiniones)</span>
               </div>
 
-              <div className="text-lg font-extrabold text-white">${product.price} USD</div>
+              <div className="text-lg font-extrabold text-white">S/. {product.price}</div>
               <p className="text-zinc-400 text-xs leading-relaxed line-clamp-3">{product.description}</p>
             </div>
 

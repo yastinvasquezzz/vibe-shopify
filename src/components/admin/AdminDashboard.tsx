@@ -218,7 +218,7 @@ export const AdminDashboard: React.FC = () => {
                         <span className="px-2.5 py-0.5 rounded-full bg-accent-500/10 text-accent-400 font-semibold text-[10px] uppercase tracking-wide">
                           {order.status}
                         </span>
-                        <span className="text-xs font-extrabold text-white">${order.total} USD</span>
+                        <span className="text-xs font-extrabold text-white">S/. {order.total}</span>
                       </div>
                     </div>
 
@@ -229,7 +229,7 @@ export const AdminDashboard: React.FC = () => {
                             {item.product.name} ({item.selectedSize} / {item.selectedColor.name})
                           </span>
                           <span className="text-zinc-500 font-mono">
-                            Cant: {item.quantity} x ${item.product.price}
+                            Cant: {item.quantity} x S/. {item.product.price}
                           </span>
                         </div>
                       ))}
@@ -265,7 +265,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="glass border border-white/5 p-5 rounded-2xl flex items-center justify-between">
           <div className="space-y-1.5">
             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Ventas Totales</span>
-            <h3 className="text-2xl font-extrabold text-white">${salesTotal.toFixed(2)}</h3>
+            <h3 className="text-2xl font-extrabold text-white">S/. {salesTotal.toFixed(2)}</h3>
           </div>
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
             <DollarSign size={18} />
@@ -312,7 +312,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
 
           <div className="h-40 w-full flex items-end justify-between gap-1 pt-6 pb-2 px-1 relative">
-            <div className="absolute left-0 top-0 text-[9px] text-zinc-650 font-bold uppercase">Ingresos ($)</div>
+            <div className="absolute left-0 top-0 text-[9px] text-zinc-650 font-bold uppercase">Ingresos (S/.)</div>
             <svg className="w-full h-full overflow-visible" viewBox="0 0 300 120">
               <defs>
                 <linearGradient id="gradient-chart" x1="0" y1="0" x2="0" y2="1">
@@ -391,7 +391,7 @@ export const AdminDashboard: React.FC = () => {
                           onChange={(e) => setEditPriceInput(Math.max(1, parseFloat(e.target.value)))}
                           className="checkout-input py-1 px-2.5 text-xs w-24"
                         />
-                        <span className="text-[10px] text-zinc-500 font-bold">USD</span>
+                        <span className="text-[10px] text-zinc-500 font-bold">PEN</span>
                       </div>
                       <div className="space-y-1.5">
                         <div className="text-[10px] text-zinc-500 font-bold uppercase">Stock:</div>
@@ -417,7 +417,7 @@ export const AdminDashboard: React.FC = () => {
                   ) : (
                     <div className="flex items-center justify-between sm:justify-end gap-4">
                       <div className="text-right">
-                        <div className="text-xs font-extrabold text-white">${product.price} USD</div>
+                        <div className="text-xs font-extrabold text-white">S/. {product.price}</div>
                         <div className="text-[9px] text-zinc-500 font-bold uppercase mt-1">
                           Stock: {Object.values(product.stock).reduce((a, b) => a + b, 0)} uds
                         </div>
@@ -485,7 +485,7 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div>
-                <label className="checkout-label">Precio (USD)</label>
+                <label className="checkout-label">Precio (S/.)</label>
                 <input
                   type="number"
                   required
@@ -649,7 +649,7 @@ export const AdminDashboard: React.FC = () => {
                       <div className="text-[10px] text-zinc-500 font-mono mt-0.5">{order.shippingAddress.email}</div>
                     </td>
                     <td className="py-3.5 px-4 text-zinc-450 flex items-center gap-1 mt-1"><Clock size={12} /> {order.date}</td>
-                    <td className="py-3.5 px-4 font-bold text-white">${order.total} USD</td>
+                    <td className="py-3.5 px-4 font-bold text-white">S/. {order.total}</td>
                     <td className="py-3.5 px-4">
                       <span className={`px-2 py-0.5 rounded-full font-semibold text-[9px] uppercase tracking-wide ${
                         order.status === 'delivered' ? 'bg-emerald-500/10 text-emerald-400' :

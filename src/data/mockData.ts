@@ -265,6 +265,241 @@ export const mockProducts: Product[] = [
         date: '2026-07-05'
       }
     ]
+  },
+  {
+    id: 'prod-007',
+    name: 'Auriculares Deportivos FitBuds Active',
+    description: 'Auriculares deportivos ergonómicos con ganchos de sujeción flexibles, resistentes a la sudoración profunda y sonido de alto impacto con graves reforzados para motivar tus entrenamientos.',
+    price: 129,
+    originalPrice: 159,
+    rating: 4.6,
+    reviewCount: 88,
+    images: [
+      'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=800&q=80',
+      'https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=800&q=80'
+    ],
+    category: 'Audio',
+    tags: ['Deporte', 'Resistente', 'Oferta'],
+    colors: [
+      { name: 'Negro Voltio', hex: '#1e1b4b' },
+      { name: 'Amarillo Neón', hex: '#a3e635' }
+    ],
+    sizes: ['M'],
+    stock: {
+      'M-Negro Voltio': 14,
+      'M-Amarillo Neón': 20
+    },
+    details: [
+      'Clasificación IPX7 de resistencia al agua y al sudor.',
+      'Hasta 8 horas de batería en los auriculares y 24 horas extra con el estuche.',
+      'Ganchos para la oreja ajustables y seguros para máxima estabilidad.',
+      'Controladores dinámicos de 10 mm optimizados para bajos.'
+    ],
+    reviews: [
+      {
+        id: 'rev-701',
+        author: 'Roberto F.',
+        rating: 5,
+        comment: 'No se caen por nada mientras corro y el sonido es muy potente.',
+        date: '2026-07-01'
+      }
+    ]
+  },
+  {
+    id: 'prod-008',
+    name: 'Gafas de Sol Polarizadas VibeShades',
+    description: 'Protege tu vista con estilo. Las VibeShades cuentan con lentes polarizadas con filtro UV400 y montura de policarbonato ligera de alta resistencia para un look moderno y urbano.',
+    price: 79,
+    rating: 4.8,
+    reviewCount: 112,
+    images: [
+      'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=800&q=80',
+      'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800&q=80'
+    ],
+    category: 'Accesorios',
+    tags: ['Estilo', 'Verano', 'Popular'],
+    colors: [
+      { name: 'Negro Clásico', hex: '#09090b' },
+      { name: 'Marrón Carey', hex: '#78350f' }
+    ],
+    sizes: ['Estándar'],
+    stock: {
+      'Estándar-Negro Clásico': 35,
+      'Estándar-Marrón Carey': 18
+    },
+    details: [
+      'Lentes polarizadas TAC con reducción del deslumbramiento.',
+      'Protección 100% contra rayos UVA y UVB (UV400).',
+      'Montura de policarbonato ultra ligera y flexible.',
+      'Incluye estuche de microfibra de limpieza ecológica.'
+    ],
+    reviews: [
+      {
+        id: 'rev-801',
+        author: 'Lucía P.',
+        rating: 5,
+        comment: 'Ligeras, cómodas y la polarización es de primera calidad. Se ven geniales.',
+        date: '2026-07-03'
+      }
+    ]
+  },
+  {
+    id: 'prod-009',
+    name: 'Sudadera Oversize Urban Hoodie',
+    description: 'Confort térmico absoluto con estilo urbano. Confeccionada con una mezcla de algodón pesado premium y felpa interior cepillada. Hombros caídos y un ajuste relajado perfecto para el frío.',
+    price: 149,
+    originalPrice: 179,
+    rating: 4.7,
+    reviewCount: 95,
+    images: [
+      'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80',
+      'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=800&q=80'
+    ],
+    category: 'Moda',
+    tags: ['Oversize', 'Confort', 'Frío'],
+    colors: [
+      { name: 'Gris Melange', hex: '#71717a' },
+      { name: 'Crema Hueso', hex: '#f5f5f4' }
+    ],
+    sizes: ['S', 'M', 'L'],
+    stock: {
+      'S-Gris Melange': 12,
+      'M-Gris Melange': 15,
+      'L-Gris Melange': 8,
+      'S-Crema Hueso': 5,
+      'M-Crema Hueso': 10,
+      'L-Crema Hueso': 4
+    },
+    details: [
+      'Tejido de felpa pesada de 400 g/m² de algodón orgánico.',
+      'Capucha de doble capa sin cordones para un diseño minimalista.',
+      'Bolsillo tipo canguro delantero espacioso.',
+      'Puños y dobladillo acanalados de alta elasticidad.'
+    ],
+    reviews: [
+      {
+        id: 'rev-901',
+        author: 'Diego V.',
+        rating: 4.5,
+        comment: 'El material es súper grueso y abrigador, la caída oversize queda espectacular.',
+        date: '2026-07-04'
+      }
+    ]
+  },
+  {
+    id: 'prod-010',
+    name: 'Gorra Deportiva FlexCap',
+    description: 'Mantente fresco bajo el sol. Gorra ligera con paneles traseros microperforados láser para una ventilación superior, banda absorbente interna contra el sudor y correa de ajuste seguro.',
+    price: 49,
+    rating: 4.4,
+    reviewCount: 63,
+    images: [
+      'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=800&q=80',
+      'https://images.unsplash.com/photo-1534215754734-18e55d13ce35?w=800&q=80'
+    ],
+    category: 'Moda',
+    tags: ['Deporte', 'Básicos', 'Accesorios'],
+    colors: [
+      { name: 'Negro Obsidiana', hex: '#18181b' },
+      { name: 'Blanco Deportivo', hex: '#f4f4f5' }
+    ],
+    sizes: ['Única'],
+    stock: {
+      'Única-Negro Obsidiana': 25,
+      'Única-Blanco Deportivo': 15
+    },
+    details: [
+      'Tejido técnico transpirable de secado ultra rápido.',
+      'Paneles de ventilación perforados con láser en los laterales.',
+      'Cierre de hebilla de perfil bajo con banda elástica.',
+      'Visera semi-curva estructurada.'
+    ],
+    reviews: [
+      {
+        id: 'rev-1001',
+        author: 'Marcos A.',
+        rating: 4.5,
+        comment: 'Súper liviana y ventilada para salir a correr al mediodía.',
+        date: '2026-06-20'
+      }
+    ]
+  },
+  {
+    id: 'prod-011',
+    name: 'Parlante Inalámbrico SoundWave Outdoor',
+    description: 'Sonido estéreo envolvente de 360 grados y 20W de potencia para exteriores. El SoundWave cuenta con protección IPX7 contra agua, radiadores pasivos duales y 16 horas de batería continua.',
+    price: 199,
+    originalPrice: 249,
+    rating: 4.8,
+    reviewCount: 154,
+    images: [
+      'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=800&q=80',
+      'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=800&q=80'
+    ],
+    category: 'Audio',
+    tags: ['Sonido', 'Portátil', 'Impermeable'],
+    colors: [
+      { name: 'Negro Carbón', hex: '#0f172a' },
+      { name: 'Rojo Carmín', hex: '#991b1b' }
+    ],
+    sizes: ['Estándar'],
+    stock: {
+      'Estándar-Negro Carbón': 20,
+      'Estándar-Rojo Carmín': 10
+    },
+    details: [
+      'Tecnología SoundDirection de 360° con drivers activos duales.',
+      'Certificación IPX7 a prueba de agua (sumergible hasta 1m por 30min).',
+      'Batería recargable de 4000mAh para 16 horas de música.',
+      'Función PartySync para emparejar 2 altavoces en estéreo real.'
+    ],
+    reviews: [
+      {
+        id: 'rev-1101',
+        author: 'Esteban C.',
+        rating: 5,
+        comment: 'El volumen que tiene para su tamaño es brutal, y los bajos se sienten excelente en exteriores.',
+        date: '2026-07-07'
+      }
+    ]
+  },
+  {
+    id: 'prod-012',
+    name: 'Cargador Portátil PowerMatrix 10K',
+    description: 'Energía de respaldo ultra compacta de 10,000mAh con soporte de carga rápida Power Delivery (PD) de 22.5W. Pantalla LED digital inteligente indicadora de porcentaje de batería restante.',
+    price: 89,
+    rating: 4.7,
+    reviewCount: 180,
+    images: [
+      'https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=800&q=80',
+      'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800&q=80'
+    ],
+    category: 'Accesorios',
+    tags: ['Carga', 'Viajes', 'Básicos'],
+    colors: [
+      { name: 'Gris Titanio', hex: '#4b5563' },
+      { name: 'Blanco Glaciar', hex: '#f3f4f6' }
+    ],
+    sizes: ['Estándar'],
+    stock: {
+      'Estándar-Gris Titanio': 30,
+      'Estándar-Blanco Glaciar': 25
+    },
+    details: [
+      'Capacidad real de 10,000 mAh para cargar 2-3 veces tu smartphone.',
+      'Carga rápida bidireccional USB-C Power Delivery de 22.5W.',
+      'Pantalla LED oculta con indicador de nivel digital en tiempo real.',
+      'Protecciones integradas contra sobrecalentamiento y cortounidades.'
+    ],
+    reviews: [
+      {
+        id: 'rev-1201',
+        author: 'Andrea M.',
+        rating: 5,
+        comment: 'Súper compacta, entra fácil en el bolsillo del pantalón y carga mi teléfono muy rápido.',
+        date: '2026-07-02'
+      }
+    ]
   }
 ];
 export const mockCouponCodes: { [code: string]: number } = {

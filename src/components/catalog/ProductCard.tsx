@@ -105,9 +105,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </h3>
 
           <div className="flex items-baseline gap-2">
-            <span className="text-base font-extrabold text-white">${product.price}</span>
+            <span className="text-base font-extrabold text-white">S/. {product.price}</span>
             {product.originalPrice && (
-              <span className="text-xs text-zinc-500 line-through">${product.originalPrice}</span>
+              <span className="text-xs text-zinc-500 line-through">S/. {product.originalPrice}</span>
             )}
           </div>
 

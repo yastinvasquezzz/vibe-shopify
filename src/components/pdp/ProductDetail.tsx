@@ -193,9 +193,9 @@ export const ProductDetail: React.FC = () => {
             </div>
 
             <div className="flex items-baseline gap-3 pt-2">
-              <span className="text-3xl font-extrabold text-white">${product.price} USD</span>
+              <span className="text-3xl font-extrabold text-white">S/. {product.price}</span>
               {product.originalPrice && (
-                <span className="text-base text-zinc-500 line-through">${product.originalPrice} USD</span>
+                <span className="text-base text-zinc-500 line-through">S/. {product.originalPrice}</span>
               )}
             </div>
 

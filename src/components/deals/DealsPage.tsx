@@ -131,8 +131,8 @@ export const DealsPage: React.FC = () => {
 
               <div className="pt-4 mt-4 border-t border-zinc-900 flex justify-between items-center gap-4">
                 <div>
-                  <span className="text-xs text-zinc-500 line-through font-medium font-mono">${originalPrice}</span>
-                  <span className="text-base font-extrabold text-white block">${p.price} USD</span>
+                  <span className="text-xs text-zinc-500 line-through font-medium font-mono">S/. {originalPrice}</span>
+                  <span className="text-base font-extrabold text-white block">S/. {p.price}</span>
                 </div>
                 <button
                   onClick={() => addToCart(p, p.colors[0], p.sizes[0], 1)}

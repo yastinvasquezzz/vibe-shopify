@@ -503,7 +503,7 @@ export const CheckoutFlow: React.FC = () => {
                   ) : (
                     <>
                       <Shield size={14} />
-                      <span>Confirmar y Pagar ${finalTotal.toFixed(2)} USD</span>
+                      <span>Confirmar y Pagar S/. {finalTotal.toFixed(2)}</span>
                     </>
                   )}
                 </button>
@@ -530,7 +530,7 @@ export const CheckoutFlow: React.FC = () => {
                     <p className="text-zinc-550 mt-0.5">Talla: {item.selectedSize} | Color: {item.selectedColor.name}</p>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-white">${item.product.price * item.quantity}</div>
+                    <div className="font-bold text-white">S/. {item.product.price * item.quantity}</div>
                     <div className="text-[10px] text-zinc-500 font-medium">Cant: {item.quantity}</div>
                   </div>
                 </div>
@@ -581,7 +581,7 @@ export const CheckoutFlow: React.FC = () => {
             <div className="space-y-2 pt-4 border-t border-zinc-900 text-xs">
               <div className="flex justify-between text-zinc-500">
                 <span>Subtotal</span>
-                <span className="text-zinc-300 font-semibold">${cartSubtotal.toFixed(2)}</span>
+                <span className="text-zinc-300 font-semibold">S/. {cartSubtotal.toFixed(2)}</span>
               </div>
 
               {discountRate > 0 && (
@@ -589,7 +589,7 @@ export const CheckoutFlow: React.FC = () => {
                   <span className="text-emerald-500 font-bold flex items-center gap-1">
                     <Ticket size={12} /> Descuento ({couponCode})
                   </span>
-                  <span className="text-emerald-500 font-bold">-${discountAmount.toFixed(2)}</span>
+                  <span className="text-emerald-500 font-bold">-S/. {discountAmount.toFixed(2)}</span>
                 </div>
               )}
 
@@ -601,19 +601,19 @@ export const CheckoutFlow: React.FC = () => {
                   ) : checkoutStep === 1 ? (
                     'Calculado en paso 2'
                   ) : (
-                    `$${shippingCost.toFixed(2)}`
+                    `S/. ${shippingCost.toFixed(2)}`
                   )}
                 </span>
               </div>
 
               <div className="flex justify-between text-zinc-500">
                 <span>Impuestos (18% IGV)</span>
-                <span className="text-zinc-300 font-semibold">${tax.toFixed(2)}</span>
+                <span className="text-zinc-300 font-semibold">S/. {tax.toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between text-sm font-bold pt-3 border-t border-zinc-900 text-white">
                 <span>Total Final</span>
-                <span className="text-accent-400">${finalTotal.toFixed(2)} USD</span>
+                <span className="text-accent-400">S/. {finalTotal.toFixed(2)}</span>
               </div>
             </div>
           </div>
