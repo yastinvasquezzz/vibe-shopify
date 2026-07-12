@@ -18,7 +18,8 @@ export const AdminDashboard: React.FC = () => {
     addCoupon,
     deleteCoupon,
     toggleCoupon,
-    updateOrderStatus
+    updateOrderStatus,
+    logout
   } = useStore();
 
   const [editingProfile, setEditingProfile] = useState(false);
@@ -186,6 +187,12 @@ export const AdminDashboard: React.FC = () => {
                   className="w-full mt-2 py-2 bg-zinc-900 border border-zinc-850 hover:bg-zinc-800 text-xs font-bold text-zinc-300 hover:text-white rounded-xl transition-all flex items-center justify-center gap-1.5"
                 >
                   <Edit3 size={12} /> Editar Perfil
+                </button>
+                <button
+                  onClick={logout}
+                  className="w-full mt-2 py-2 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-xs font-bold text-red-400 rounded-xl transition-all flex items-center justify-center gap-1.5"
+                >
+                  Cerrar Sesión
                 </button>
               </div>
             )}
