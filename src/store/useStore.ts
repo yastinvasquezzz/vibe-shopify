@@ -583,17 +583,25 @@ export const useStore = create<StoreState>()(
           const { data } = await supabase.auth.getSession();
           if (data.session && data.session.user) {
             const profile = data.session.user;
+            
+            // Query the custom users table for profile information
+            const { data: dbUser } = await supabase
+              .from('users')
+              .select('*')
+              .eq('email', profile.email)
+              .maybeSingle();
+
             set({
               isLoggedIn: true,
               user: {
-                fullName: profile.user_metadata.full_name || 'Usuario Vibe',
+                fullName: dbUser?.full_name || profile.user_metadata.full_name || 'Usuario Vibe',
                 email: profile.email || '',
-                phone: profile.user_metadata.phone || '',
-                address: profile.user_metadata.address || '',
-                city: profile.user_metadata.city || '',
-                postalCode: profile.user_metadata.postal_code || '',
-                country: profile.user_metadata.country || '',
-                role: (profile.user_metadata.role as 'admin' | 'customer') || 'customer'
+                phone: dbUser?.phone || '',
+                address: dbUser?.address || '',
+                city: dbUser?.city || '',
+                postalCode: dbUser?.postal_code || '',
+                country: dbUser?.country || '',
+                role: (dbUser?.role as 'admin' | 'customer') || 'customer'
               }
             });
           }

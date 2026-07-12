@@ -73,15 +73,21 @@ export const AuthPage = () => {
       }
 
       const profile = data.user;
+      const { data: dbUser } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', profile.email)
+        .maybeSingle();
+
       updateUser({
-        fullName: profile.user_metadata.full_name || 'Usuario Vibe',
+        fullName: dbUser?.full_name || profile.user_metadata.full_name || 'Usuario Vibe',
         email: profile.email || '',
-        phone: profile.user_metadata.phone || '',
-        address: profile.user_metadata.address || '',
-        city: profile.user_metadata.city || '',
-        postalCode: profile.user_metadata.postal_code || '',
-        country: profile.user_metadata.country || '',
-        role: (profile.user_metadata.role as 'admin' | 'customer') || 'customer'
+        phone: dbUser?.phone || '',
+        address: dbUser?.address || '',
+        city: dbUser?.city || '',
+        postalCode: dbUser?.postal_code || '',
+        country: dbUser?.country || '',
+        role: (dbUser?.role as 'admin' | 'customer') || 'customer'
       });
       login();
       setActiveView('home');
@@ -129,14 +135,13 @@ export const AuthPage = () => {
         return;
       }
 
-      const isAdmin = regEmail.toLowerCase().includes('admin');
       const { data, error } = await supabase.auth.signUp({
         email: regEmail,
         password: regPassword,
         options: {
           data: {
             full_name: regName,
-            role: isAdmin ? 'admin' : 'customer',
+            role: 'customer' as 'admin' | 'customer',
             phone: '',
             address: '',
             city: '',
