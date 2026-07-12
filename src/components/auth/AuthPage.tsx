@@ -140,22 +140,6 @@ export const AuthPage = () => {
         return;
       }
 
-      const { error: insertError } = await supabase
-        .from('users')
-        .insert({
-          email: regEmail,
-          full_name: regName,
-          password: '---',
-          phone: '',
-          address: '',
-          city: '',
-          postal_code: '',
-          country: '',
-          role: isAdmin ? 'admin' : 'customer'
-        });
-
-      if (insertError) throw insertError;
-
       if (!data.session) {
         setRegisterSuccess(true);
         return;
