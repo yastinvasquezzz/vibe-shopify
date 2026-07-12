@@ -49,6 +49,7 @@ interface StoreState {
   wishlist: string[];
   recentlyViewed: string[];
   isLoggedIn: boolean;
+  allUsers: User[];
 
   setProducts: (products: Product[]) => void;
   updateProductStock: (productId: string, variantKey: string, newStock: number) => void;
@@ -101,6 +102,9 @@ interface StoreState {
   fetchCoupons: () => Promise<void>;
   fetchOrders: () => Promise<void>;
   checkSession: () => Promise<void>;
+  fetchAllUsers: () => Promise<void>;
+  updateUserRole: (email: string, role: 'admin' | 'customer') => Promise<void>;
+  updateProductDetails: (productId: string, updatedProduct: Partial<Product>) => Promise<void>;
 }
 
 export const useStore = create<StoreState>()(
@@ -179,6 +183,7 @@ export const useStore = create<StoreState>()(
   wishlist: [],
   recentlyViewed: [],
   isLoggedIn: false,
+  allUsers: [],
 
   setProducts: (products) => set({ products }),
   
@@ -699,6 +704,70 @@ export const useStore = create<StoreState>()(
           }
         } catch (err) {
           console.error('Error fetching orders:', err);
+        }
+      },
+
+      fetchAllUsers: async () => {
+        try {
+          const { data, error } = await supabase.from('users').select('*');
+          if (error) throw error;
+          if (data) {
+            const mapped = data.map((u: any) => ({
+              fullName: u.full_name,
+              email: u.email,
+              phone: u.phone || '',
+              address: u.address || '',
+              city: u.city || '',
+              postalCode: u.postal_code || '',
+              country: u.country || '',
+              role: u.role || 'customer'
+            }));
+            set({ allUsers: mapped });
+          }
+        } catch (err) {
+          console.error('Error fetching all users:', err);
+        }
+      },
+
+      updateUserRole: async (email, role) => {
+        set((state) => ({
+          allUsers: state.allUsers.map((u) => u.email === email ? { ...u, role } : u)
+        }));
+        try {
+          const { error } = await supabase
+            .from('users')
+            .update({ role })
+            .eq('email', email);
+          if (error) throw error;
+        } catch (err) {
+          console.error('Error updating user role:', err);
+        }
+      },
+
+      updateProductDetails: async (productId, updatedProduct) => {
+        set((state) => ({
+          products: state.products.map((p) => p.id === productId ? { ...p, ...updatedProduct } : p)
+        }));
+        try {
+          const { error } = await supabase
+            .from('products')
+            .update({
+              name: updatedProduct.name,
+              description: updatedProduct.description,
+              price: updatedProduct.price,
+              original_price: updatedProduct.originalPrice || null,
+              category: updatedProduct.category,
+              tags: updatedProduct.tags,
+              images: updatedProduct.images,
+              colors: updatedProduct.colors,
+              sizes: updatedProduct.sizes,
+              stock: updatedProduct.stock,
+              details: updatedProduct.details
+            })
+            .eq('id', productId);
+          if (error) throw error;
+        } catch (err) {
+          console.error('Error updating product details:', err);
         }
       },
     }),
