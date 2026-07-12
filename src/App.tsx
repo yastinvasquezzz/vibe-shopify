@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ActiveView } from './types/store';
 import { useStore } from './store/useStore';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
@@ -34,6 +35,7 @@ export const App: React.FC = () => {
     activeView,
     setActiveView,
     setSelectedProductId,
+    selectedProductId,
     isFilterSidebarOpen,
     setFilterSidebarOpen,
     cart,
@@ -43,6 +45,53 @@ export const App: React.FC = () => {
   } = useStore();
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+  // Synchronize state to URL Hash
+  React.useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      if (!hash || hash === '#home') {
+        setActiveView('home');
+        setSelectedProductId(null);
+      } else if (hash.startsWith('#product/')) {
+        const prodId = hash.replace('#product/', '');
+        setSelectedProductId(prodId);
+        setActiveView('pdp');
+      } else {
+        const view = hash.replace('#', '') as ActiveView;
+        const validViews: ActiveView[] = [
+          'home', 'catalog', 'pdp', 'cart', 'checkout', 'profile', 'admin',
+          'help', 'blog', 'track', 'wishlist', 'auth', 'about', 'deals',
+          'collections', 'sizeguide', 'returns', 'notfound'
+        ];
+        if (validViews.includes(view)) {
+          setActiveView(view);
+          if (view !== 'pdp') setSelectedProductId(null);
+        } else {
+          setActiveView('notfound');
+        }
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    if (window.location.hash) {
+      handleHashChange();
+    }
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [setActiveView, setSelectedProductId]);
+
+  // Synchronize URL Hash from State changes
+  React.useEffect(() => {
+    if (activeView === 'pdp' && selectedProductId) {
+      if (window.location.hash !== `#product/${selectedProductId}`) {
+        window.location.hash = `#product/${selectedProductId}`;
+      }
+    } else {
+      if (window.location.hash !== `#${activeView}`) {
+        window.location.hash = `#${activeView}`;
+      }
+    }
+  }, [activeView, selectedProductId]);
 
   return (
     <ErrorBoundary>

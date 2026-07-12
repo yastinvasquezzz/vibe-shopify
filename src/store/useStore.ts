@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { Product, CartItem, Order, User, ShippingAddress, ProductColor, Article, Coupon, ActiveView } from '../types/store';
 import { mockProducts, mockUser } from '../data/mockData';
 
@@ -97,8 +98,10 @@ interface StoreState {
   logout: () => void;
 }
 
-export const useStore = create<StoreState>((set, get) => ({
-  products: mockProducts,
+export const useStore = create<StoreState>()(
+  persist(
+    (set, get) => ({
+      products: mockProducts,
   user: mockUser,
   orders: [],
   cart: [],
@@ -464,6 +467,21 @@ export const useStore = create<StoreState>((set, get) => ({
     return { recentlyViewed: [productId, ...filtered].slice(0, 8) };
   }),
 
-  login: () => set({ isLoggedIn: true }),
-  logout: () => set({ isLoggedIn: false, user: mockUser }),
-}));
+      login: () => set({ isLoggedIn: true }),
+      logout: () => set({ isLoggedIn: false, user: mockUser }),
+    }),
+    {
+      name: 'vibe-shopify-store',
+      partialize: (state) => ({
+        cart: state.cart,
+        wishlist: state.wishlist,
+        recentlyViewed: state.recentlyViewed,
+        isLoggedIn: state.isLoggedIn,
+        user: state.user,
+        orders: state.orders,
+        coupons: state.coupons,
+        products: state.products
+      }),
+    }
+  )
+);
