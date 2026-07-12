@@ -48,6 +48,7 @@ export const App: React.FC = () => {
     checkSession
   } = useStore();
 
+  // Trigger auto-build after Git repo linkage
   const [toast, setToast] = React.useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
