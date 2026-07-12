@@ -105,6 +105,19 @@ export const AuthPage = () => {
     setErrors({});
 
     try {
+      const { data: existingUser, error: checkError } = await supabase
+        .from('users')
+        .select('email')
+        .eq('email', regEmail)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+
+      if (existingUser) {
+        setErrors({ email: 'Este correo electrónico ya está registrado' });
+        return;
+      }
+
       const isAdmin = regEmail.toLowerCase().includes('admin');
       const { data, error } = await supabase.auth.signUp({
         email: regEmail,
@@ -126,6 +139,22 @@ export const AuthPage = () => {
         setErrors({ email: error?.message || 'Error al registrar la cuenta' });
         return;
       }
+
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert({
+          email: regEmail,
+          full_name: regName,
+          password: '---',
+          phone: '',
+          address: '',
+          city: '',
+          postal_code: '',
+          country: '',
+          role: isAdmin ? 'admin' : 'customer'
+        });
+
+      if (insertError) throw insertError;
 
       if (!data.session) {
         setRegisterSuccess(true);
