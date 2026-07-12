@@ -41,10 +41,20 @@ export const App: React.FC = () => {
     cart,
     isLoggedIn,
     wishlist,
-    user
+    user,
+    fetchProducts,
+    fetchCoupons,
+    fetchOrders
   } = useStore();
 
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+
+  // Load data from Supabase on mount
+  React.useEffect(() => {
+    fetchProducts();
+    fetchCoupons();
+    fetchOrders();
+  }, [fetchProducts, fetchCoupons, fetchOrders]);
 
   // Synchronize state to URL Hash
   React.useEffect(() => {

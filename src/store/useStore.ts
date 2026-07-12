@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Product, CartItem, Order, User, ShippingAddress, ProductColor, Article, Coupon, ActiveView } from '../types/store';
 import { mockProducts, mockUser } from '../data/mockData';
+import { supabase } from '../lib/supabaseClient';
 
 interface FiltersState {
   category: string;
@@ -96,6 +97,9 @@ interface StoreState {
   addToRecentlyViewed: (productId: string) => void;
   login: () => void;
   logout: () => void;
+  fetchProducts: () => Promise<void>;
+  fetchCoupons: () => Promise<void>;
+  fetchOrders: () => Promise<void>;
 }
 
 export const useStore = create<StoreState>()(
@@ -177,13 +181,17 @@ export const useStore = create<StoreState>()(
 
   setProducts: (products) => set({ products }),
   
-  updateProductStock: (productId, variantKey, newStock) => {
+  updateProductStock: async (productId, variantKey, newStock) => {
+    const product = get().products.find(p => p.id === productId);
+    if (!product) return;
+    const updatedStock = { ...product.stock, [variantKey]: newStock };
+
     set((state) => {
       const updatedProducts = state.products.map((p) => {
         if (p.id === productId) {
           return {
             ...p,
-            stock: { ...p.stock, [variantKey]: newStock }
+            stock: updatedStock
           };
         }
         return p;
@@ -204,9 +212,15 @@ export const useStore = create<StoreState>()(
         cart: updatedCart
       };
     });
+
+    try {
+      await supabase.from('products').update({ stock: updatedStock }).eq('id', productId);
+    } catch (err) {
+      console.error('Supabase stock update error:', err);
+    }
   },
 
-  updateProductPrice: (productId, newPrice) => {
+  updateProductPrice: async (productId, newPrice) => {
     set((state) => {
       const updatedProducts = state.products.map((p) => {
         if (p.id === productId) {
@@ -230,11 +244,36 @@ export const useStore = create<StoreState>()(
         cart: updatedCart
       };
     });
+
+    try {
+      await supabase.from('products').update({ price: newPrice }).eq('id', productId);
+    } catch (err) {
+      console.error('Supabase price update error:', err);
+    }
   },
 
   updateUser: (user) => set({ user }),
   
-  addOrder: (order) => set((state) => ({ orders: [order, ...state.orders] })),
+  addOrder: async (order) => {
+    set((state) => ({ orders: [order, ...state.orders] }));
+    try {
+      await supabase.from('orders').insert({
+        id: order.id,
+        items: order.items,
+        subtotal: order.subtotal,
+        tax: order.tax,
+        shipping_cost: order.shippingCost,
+        discount: order.discount,
+        total: order.total,
+        date: order.date,
+        status: order.status,
+        shipping_address: order.shippingAddress,
+        shipping_method: order.shippingMethod
+      });
+    } catch (err) {
+      console.error('Supabase order insert error:', err);
+    }
+  },
   
   addToCart: (product, color, size, quantity) => {
     const state = get();
@@ -438,18 +477,83 @@ export const useStore = create<StoreState>()(
   setQuickViewProductId: (quickViewProductId) => set({ quickViewProductId }),
 
   setTrackingOrderId: (trackingOrderId) => set({ trackingOrderId }),
-  addCoupon: (coupon) => set((state) => ({ coupons: [coupon, ...state.coupons] })),
-  deleteCoupon: (code) => set((state) => ({ coupons: state.coupons.filter((c) => c.code !== code) })),
-  toggleCoupon: (code) => set((state) => ({
-    coupons: state.coupons.map((c) => c.code === code ? { ...c, active: !c.active } : c)
-  })),
-  addNewProduct: (product) => set((state) => ({ products: [product, ...state.products] })),
-  deleteProduct: (productId) => set((state) => ({
-    products: state.products.filter((p) => p.id !== productId)
-  })),
-  updateOrderStatus: (orderId, status) => set((state) => ({
-    orders: state.orders.map((o) => o.id === orderId ? { ...o, status } : o)
-  })),
+  addCoupon: async (coupon) => {
+    set((state) => ({ coupons: [coupon, ...state.coupons] }));
+    try {
+      await supabase.from('coupons').insert({
+        code: coupon.code,
+        discount_rate: coupon.discountRate,
+        active: coupon.active
+      });
+    } catch (err) {
+      console.error('Supabase coupon insert error:', err);
+    }
+  },
+  deleteCoupon: async (code) => {
+    set((state) => ({ coupons: state.coupons.filter((c) => c.code !== code) }));
+    try {
+      await supabase.from('coupons').delete().eq('code', code);
+    } catch (err) {
+      console.error('Supabase coupon delete error:', err);
+    }
+  },
+  toggleCoupon: async (code) => {
+    const coupon = get().coupons.find(c => c.code === code);
+    if (!coupon) return;
+    const nextActive = !coupon.active;
+    set((state) => ({
+      coupons: state.coupons.map((c) => c.code === code ? { ...c, active: nextActive } : c)
+    }));
+    try {
+      await supabase.from('coupons').update({ active: nextActive }).eq('code', code);
+    } catch (err) {
+      console.error('Supabase coupon toggle error:', err);
+    }
+  },
+  addNewProduct: async (product) => {
+    set((state) => ({ products: [product, ...state.products] }));
+    try {
+      await supabase.from('products').insert({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        original_price: product.originalPrice || null,
+        rating: product.rating,
+        review_count: product.reviewCount,
+        images: product.images,
+        category: product.category,
+        tags: product.tags,
+        colors: product.colors,
+        sizes: product.sizes,
+        stock: product.stock,
+        details: product.details,
+        reviews: product.reviews
+      });
+    } catch (err) {
+      console.error('Supabase product insert error:', err);
+    }
+  },
+  deleteProduct: async (productId) => {
+    set((state) => ({
+      products: state.products.filter((p) => p.id !== productId)
+    }));
+    try {
+      await supabase.from('products').delete().eq('id', productId);
+    } catch (err) {
+      console.error('Supabase product delete error:', err);
+    }
+  },
+  updateOrderStatus: async (orderId, status) => {
+    set((state) => ({
+      orders: state.orders.map((o) => o.id === orderId ? { ...o, status } : o)
+    }));
+    try {
+      await supabase.from('orders').update({ status }).eq('id', orderId);
+    } catch (err) {
+      console.error('Supabase order status update error:', err);
+    }
+  },
 
   toggleWishlist: (productId) => set((state) => {
     const exists = state.wishlist.includes(productId);
@@ -469,6 +573,98 @@ export const useStore = create<StoreState>()(
 
       login: () => set({ isLoggedIn: true }),
       logout: () => set({ isLoggedIn: false, user: mockUser }),
+
+      fetchProducts: async () => {
+        try {
+          const { data, error } = await supabase.from('products').select('*');
+          if (error) throw error;
+          
+          if (!data || data.length === 0) {
+            const formatted = mockProducts.map(p => ({
+              id: p.id,
+              name: p.name,
+              description: p.description,
+              price: p.price,
+              original_price: p.originalPrice || null,
+              rating: p.rating,
+              review_count: p.reviewCount,
+              images: p.images,
+              category: p.category,
+              tags: p.tags,
+              colors: p.colors,
+              sizes: p.sizes,
+              stock: p.stock,
+              details: p.details,
+              reviews: p.reviews
+            }));
+            await supabase.from('products').insert(formatted);
+            set({ products: mockProducts });
+          } else {
+            const mapped = data.map((p: any) => ({
+              id: p.id,
+              name: p.name,
+              description: p.description,
+              price: Number(p.price),
+              originalPrice: p.original_price ? Number(p.original_price) : undefined,
+              rating: Number(p.rating),
+              reviewCount: Number(p.review_count),
+              images: p.images,
+              category: p.category,
+              tags: p.tags,
+              colors: p.colors,
+              sizes: p.sizes,
+              stock: p.stock,
+              details: p.details,
+              reviews: p.reviews
+            }));
+            set({ products: mapped });
+          }
+        } catch (err) {
+          console.error('Error fetching products from Supabase:', err);
+        }
+      },
+
+      fetchCoupons: async () => {
+        try {
+          const { data, error } = await supabase.from('coupons').select('*');
+          if (error) throw error;
+          if (data && data.length > 0) {
+            const mapped = data.map((c: any) => ({
+              code: c.code,
+              discountRate: Number(c.discount_rate),
+              active: c.active
+            }));
+            set({ coupons: mapped });
+          }
+        } catch (err) {
+          console.error('Error fetching coupons:', err);
+        }
+      },
+
+      fetchOrders: async () => {
+        try {
+          const { data, error } = await supabase.from('orders').select('*');
+          if (error) throw error;
+          if (data) {
+            const mapped = data.map((o: any) => ({
+              id: o.id,
+              items: o.items,
+              subtotal: Number(o.subtotal),
+              tax: Number(o.tax),
+              shippingCost: Number(o.shipping_cost),
+              discount: Number(o.discount),
+              total: Number(o.total),
+              date: o.date,
+              status: o.status,
+              shippingAddress: o.shipping_address,
+              shippingMethod: o.shipping_method
+            }));
+            set({ orders: mapped });
+          }
+        } catch (err) {
+          console.error('Error fetching orders:', err);
+        }
+      },
     }),
     {
       name: 'vibe-shopify-store',
