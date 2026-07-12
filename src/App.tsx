@@ -48,6 +48,8 @@ export const App: React.FC = () => {
     checkSession
   } = useStore();
 
+  const [toast, setToast] = React.useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+
   const cartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   // Load data from Supabase on mount
@@ -58,10 +60,44 @@ export const App: React.FC = () => {
     fetchOrders();
   }, [checkSession, fetchProducts, fetchCoupons, fetchOrders]);
 
+  // Auto-dismiss toast
+  React.useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  // Check URL access token for email confirmation / Google sign in redirects
+  React.useEffect(() => {
+    const checkUrlToken = () => {
+      const hash = window.location.hash;
+      if (hash.includes('access_token=')) {
+        setToast({
+          message: '¡Tu correo electrónico ha sido verificado con éxito! Bienvenido a VIBE.shop.',
+          type: 'success'
+        });
+        
+        setTimeout(() => {
+          window.history.replaceState(null, '', window.location.pathname + '#home');
+          setActiveView('home');
+          checkSession();
+        }, 300);
+      }
+    };
+    
+    checkUrlToken();
+    window.addEventListener('hashchange', checkUrlToken);
+    return () => window.removeEventListener('hashchange', checkUrlToken);
+  }, [checkSession, setActiveView]);
+
   // Synchronize state to URL Hash
   React.useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
+      if (hash.includes('access_token=')) {
+        return; // Handled by token listener useEffect
+      }
       if (!hash || hash === '#home') {
         setActiveView('home');
         setSelectedProductId(null);
@@ -406,6 +442,35 @@ export const App: React.FC = () => {
           </button>
         </div>
       </div>
+      
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4"
+          >
+            <div className="glass border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center justify-between gap-3 bg-zinc-950/80 backdrop-blur-xl">
+              <div className="flex items-center gap-3">
+                <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
+                  toast.type === 'success' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-accent-500/20 text-accent-400'
+                }`}>
+                  {toast.type === 'success' ? '✓' : 'ℹ'}
+                </div>
+                <p className="text-xs font-medium text-white leading-relaxed">{toast.message}</p>
+              </div>
+              <button 
+                onClick={() => setToast(null)}
+                className="text-[10px] font-bold text-zinc-500 hover:text-white uppercase tracking-wider shrink-0"
+              >
+                Cerrar
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </ErrorBoundary>
   );
 };
