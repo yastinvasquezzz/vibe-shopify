@@ -366,7 +366,7 @@ export const ProductDetail: React.FC = () => {
                   <div className="flex gap-3">
                     <Truck size={14} className="text-accent-500 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-zinc-300">Entrega gratuita (sobre $150 USD)</p>
+                      <p className="font-semibold text-zinc-300">Entrega gratuita (sobre S/. 500)</p>
                       <p className="text-zinc-500">Envío estándar nacional tarda de 3 a 5 días hábiles.</p>
                     </div>
                   </div>

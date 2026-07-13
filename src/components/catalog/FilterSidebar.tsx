@@ -88,7 +88,7 @@ export const FilterSidebar: React.FC = () => {
         <div>
           <div className="flex justify-between items-center mb-4">
             <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Precio Máximo</h4>
-            <span className="text-sm font-bold text-accent-400">${filters.maxPrice} USD</span>
+            <span className="text-sm font-bold text-accent-400">S/. {filters.maxPrice}</span>
           </div>
           <input
             type="range"
@@ -100,8 +100,8 @@ export const FilterSidebar: React.FC = () => {
             className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-accent-500"
           />
           <div className="flex justify-between text-[10px] text-zinc-500 font-bold mt-2">
-            <span>$0</span>
-            <span>$300</span>
+            <span>S/. 0</span>
+            <span>S/. 300</span>
           </div>
         </div>
 

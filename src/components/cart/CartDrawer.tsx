@@ -99,7 +99,7 @@ export const CartDrawer: React.FC = () => {
                   <span className="text-zinc-400">
                     {isFreeDelivery
                       ? '¡Felicidades! Tienes envío gratuito'
-                      : `Faltan $${deliveryLimitDiff.toFixed(2)} USD para el envío GRATIS`}
+                      : `Faltan S/. ${deliveryLimitDiff.toFixed(2)} para el envío GRATIS`}
                   </span>
                   <span className="text-accent-400 font-bold">{Math.round(progressPercent)}%</span>
                 </div>

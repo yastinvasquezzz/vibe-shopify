@@ -185,7 +185,7 @@ export const CheckoutFlow: React.FC = () => {
             </div>
             <div className="flex justify-between items-center text-xs pt-4 border-t border-zinc-900">
               <span className="text-zinc-500 font-bold uppercase tracking-wider">Total debitado</span>
-              <span className="text-sm font-extrabold text-white">${lastPlacedOrder.total.toFixed(2)} USD</span>
+              <span className="text-sm font-extrabold text-white">S/. {lastPlacedOrder.total.toFixed(2)}</span>
             </div>
           </div>
 
@@ -368,7 +368,7 @@ export const CheckoutFlow: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-xs font-bold text-white">
-                      {isFreeShipping ? 'Gratis' : '$5.00 USD'}
+                      {isFreeShipping ? 'Gratis' : 'S/. 5.00'}
                     </div>
                   </div>
 
@@ -392,7 +392,7 @@ export const CheckoutFlow: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-xs font-bold text-white">
-                      {isFreeShipping ? 'Gratis' : '$15.00 USD'}
+                      {isFreeShipping ? 'Gratis' : 'S/. 15.00'}
                     </div>
                   </div>
                 </div>
