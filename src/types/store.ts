@@ -89,6 +89,18 @@ export interface Coupon {
   active: boolean;
 }
 
+export interface Collection {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+}
+
+export interface DealSettings {
+  productId: string;
+  discountRate: number;
+}
+
 export type ActiveView =
   | 'home'
   | 'catalog'

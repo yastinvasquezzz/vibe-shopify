@@ -4,17 +4,21 @@ import { ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const CollectionsPage: React.FC = () => {
-  const { products, recentlyViewed, setActiveView, setSelectedProductId, setFilterCategory } = useStore();
+  const { products, recentlyViewed, setActiveView, setSelectedProductId, setFilterCategory, collections } = useStore();
 
-  const categories = Array.from(new Set(products.map((p) => p.category))).filter((c) => c !== 'Todos');
+  const categories = collections.length > 0
+    ? collections.map((c) => c.name)
+    : Array.from(new Set(products.map((p) => p.category))).filter((c) => c !== 'Todos');
 
-  const getCategoryImage = (category: string) => {
-    const firstProduct = products.find((p) => p.category === category);
+  const getCategoryImage = (categoryName: string) => {
+    const matchedCol = collections.find((c) => c.name === categoryName);
+    if (matchedCol && matchedCol.imageUrl) return matchedCol.imageUrl;
+    const firstProduct = products.find((p) => p.category === categoryName);
     return firstProduct ? firstProduct.images[0] : 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&q=80';
   };
 
-  const getCategoryCount = (category: string) => {
-    return products.filter((p) => p.category === category).length;
+  const getCategoryCount = (categoryName: string) => {
+    return products.filter((p) => p.category === categoryName).length;
   };
 
   const recentlyViewedProducts = recentlyViewed
@@ -28,7 +32,7 @@ export const CollectionsPage: React.FC = () => {
           <Sparkles size={10} /> Colecciones Curadas
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">Explorar Colecciones</h1>
-        <p className="text-xs text-zinc-500 font-medium">Encuentra productos diseñados para complementar tu estilo de vida.</p>
+        <p className="text-xs text-zinc-550 font-medium">Encuentra productos diseñados para complementar tu estilo de vida.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -47,12 +51,15 @@ export const CollectionsPage: React.FC = () => {
               alt={category}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent" />
             <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
               <div>
                 <span className="text-[10px] font-bold text-accent-400 uppercase tracking-widest block mb-1">Colección</span>
                 <h3 className="text-lg font-bold text-white leading-tight">{category}</h3>
-                <span className="text-xs text-zinc-400 font-medium mt-1 block">{getCategoryCount(category)} Productos</span>
+                <p className="text-[9px] text-zinc-400 line-clamp-1 max-w-[200px] truncate mt-1">
+                  {collections.find((c) => c.name === category)?.description || 'Explora esta selección de artículos.'}
+                </p>
+                <span className="text-[10px] text-zinc-500 font-bold block mt-1.5">{getCategoryCount(category)} Productos</span>
               </div>
               <div className="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 flex items-center justify-center text-white transition-colors">
                 <ArrowRight size={16} />

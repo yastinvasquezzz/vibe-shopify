@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '../../store/useStore';
-import type { User, Product, Coupon, Order } from '../../types/store';
+import type { User, Product, Coupon, Order, Article, Collection } from '../../types/store';
 import { 
   UserCheck, Package, ShoppingCart, DollarSign, Edit3, 
   Truck, Trash2, Plus, Percent, Clock, Users, BarChart3, 
-  AlertCircle, FileText, Printer, X 
+  AlertCircle, FileText, Printer, X, BookOpen, Tag, Settings
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type DashboardTab = 'metrics' | 'catalog' | 'orders' | 'users' | 'coupons';
+type DashboardTab = 'metrics' | 'catalog' | 'orders' | 'users' | 'coupons' | 'blog';
 
 export const AdminDashboard: React.FC = () => {
   const {
@@ -28,7 +28,22 @@ export const AdminDashboard: React.FC = () => {
     allUsers,
     fetchAllUsers,
     updateUserRole,
-    updateProductDetails
+    updateProductDetails,
+
+    // CMS Store variables & methods
+    articles,
+    collections,
+    dealSettings,
+    fetchArticles,
+    addArticle,
+    deleteArticle,
+    updateArticle,
+    fetchCollections,
+    addCollection,
+    deleteCollection,
+    updateCollection,
+    fetchDealSettings,
+    updateDealSettings
   } = useStore();
 
   const [activeTab, setActiveTab] = useState<DashboardTab>('metrics');
@@ -41,9 +56,25 @@ export const AdminDashboard: React.FC = () => {
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<Product | null>(null);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
 
+  // CMS Edit modals
+  const [selectedArticleForEdit, setSelectedArticleForEdit] = useState<Article | null>(null);
+  const [selectedCollectionForEdit, setSelectedCollectionForEdit] = useState<Collection | null>(null);
+
   // --- LOCAL FORM STATES ---
   const [newCouponCode, setNewCouponCode] = useState('');
   const [newCouponRate, setNewCouponRate] = useState(10);
+
+  // Deal of the Day Settings Local Form State
+  const [dealProdId, setDealProdId] = useState(dealSettings?.productId || 'prod-001');
+  const [dealDiscount, setDealDiscount] = useState(Math.round((dealSettings?.discountRate || 0.20) * 100));
+
+  // Sync Deal Settings form state when loaded from store
+  useEffect(() => {
+    if (dealSettings) {
+      setDealProdId(dealSettings.productId);
+      setDealDiscount(Math.round(dealSettings.discountRate * 100));
+    }
+  }, [dealSettings]);
 
   // New Product Form States
   const [newProdName, setNewProdName] = useState('');
@@ -61,10 +92,37 @@ export const AdminDashboard: React.FC = () => {
   const [editProdImg, setEditProdImg] = useState('');
   const [editProdStock, setEditProdStock] = useState<{ [key: string]: number }>({});
 
+  // New Collection Form States
+  const [newColName, setNewColName] = useState('');
+  const [newColDesc, setNewColDesc] = useState('');
+  const [newColImg, setNewColImg] = useState('https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80');
+
+  // Edit Collection Form States
+  const [editColName, setEditColName] = useState('');
+  const [editColDesc, setEditColDesc] = useState('');
+  const [editColImg, setEditColImg] = useState('');
+
+  // New Article Form States
+  const [newArtTitle, setNewArtTitle] = useState('');
+  const [newArtExcerpt, setNewArtExcerpt] = useState('');
+  const [newArtContent, setNewArtContent] = useState('');
+  const [newArtImg, setNewArtImg] = useState('https://images.unsplash.com/photo-1484704849700-f032a568e944?w=800&q=80');
+  const [newArtReadTime, setNewArtReadTime] = useState('3 min');
+
+  // Edit Article Form States
+  const [editArtTitle, setEditArtTitle] = useState('');
+  const [editArtExcerpt, setEditArtExcerpt] = useState('');
+  const [editArtContent, setEditArtContent] = useState('');
+  const [editArtImg, setEditArtImg] = useState('');
+  const [editArtReadTime, setEditArtReadTime] = useState('');
+
   // --- FETCH DATA ON MOUNT ---
   useEffect(() => {
     fetchAllUsers();
-  }, [fetchAllUsers]);
+    fetchArticles();
+    fetchCollections();
+    fetchDealSettings();
+  }, [fetchAllUsers, fetchArticles, fetchCollections, fetchDealSettings]);
 
   // --- UTILS & CALCULATIONS ---
   const salesTotal = orders.reduce((acc, o) => acc + o.total, 0);
@@ -91,6 +149,13 @@ export const AdminDashboard: React.FC = () => {
     setNewCouponCode('');
   };
 
+  // --- DEAL OF THE DAY UPDATE ---
+  const handleSaveDealSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateDealSettings(dealProdId, parseFloat((dealDiscount / 100).toFixed(2)));
+  };
+
+  // --- CATALOG CRUD ACTIONS ---
   const handleCreateProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProdName.trim()) return;
@@ -146,12 +211,93 @@ export const AdminDashboard: React.FC = () => {
     setSelectedProductForEdit(null);
   };
 
+  // --- COLLECTIONS CRUD ACTIONS ---
+  const handleCreateCollection = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newColName.trim()) return;
+
+    const newCol: Collection = {
+      id: `col-${Math.floor(100 + Math.random() * 900)}`,
+      name: newColName.trim(),
+      description: newColDesc || 'Nueva colección curada.',
+      imageUrl: newColImg
+    };
+
+    addCollection(newCol);
+    setNewColName('');
+    setNewColDesc('');
+  };
+
+  const handleStartEditCollection = (col: Collection) => {
+    setSelectedCollectionForEdit(col);
+    setEditColName(col.name);
+    setEditColDesc(col.description);
+    setEditColImg(col.imageUrl);
+  };
+
+  const handleSaveCollectionEdits = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCollectionForEdit) return;
+
+    updateCollection(selectedCollectionForEdit.id, {
+      name: editColName,
+      description: editColDesc,
+      imageUrl: editColImg
+    });
+
+    setSelectedCollectionForEdit(null);
+  };
+
+  // --- BLOG CRUD ACTIONS ---
+  const handleCreateArticle = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newArtTitle.trim()) return;
+
+    const newArt: Article = {
+      id: `art-${Math.floor(100 + Math.random() * 900)}`,
+      title: newArtTitle,
+      excerpt: newArtExcerpt,
+      content: newArtContent,
+      image: newArtImg,
+      date: new Date().toISOString().split('T')[0],
+      readTime: newArtReadTime
+    };
+
+    addArticle(newArt);
+    setNewArtTitle('');
+    setNewArtExcerpt('');
+    setNewArtContent('');
+  };
+
+  const handleStartEditArticle = (art: Article) => {
+    setSelectedArticleForEdit(art);
+    setEditArtTitle(art.title);
+    setEditArtExcerpt(art.excerpt || '');
+    setEditArtContent(art.content);
+    setEditArtImg(art.image || '');
+    setEditArtReadTime(art.readTime);
+  };
+
+  const handleSaveArticleEdits = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedArticleForEdit) return;
+
+    updateArticle(selectedArticleForEdit.id, {
+      title: editArtTitle,
+      excerpt: editArtExcerpt,
+      content: editArtContent,
+      image: editArtImg,
+      readTime: editArtReadTime
+    });
+
+    setSelectedArticleForEdit(null);
+  };
+
   const handlePrint = () => {
     window.print();
   };
 
-  // Render "Mi Perfil" when viewing profile tab (for backward compatibility if needed, 
-  // but let's handle the split views cleanly)
+  // Render "Mi Perfil" when viewing profile tab (for backward compatibility)
   if (activeView === 'profile') {
     return (
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-10 space-y-10">
@@ -294,10 +440,10 @@ export const AdminDashboard: React.FC = () => {
                     </div>
 
                     <div className="pt-3 border-t border-zinc-900 flex justify-between items-center text-[10px]">
-                      <div className="flex items-center gap-1.5 text-zinc-500">
+                      <div className="flex items-center gap-1.5 text-zinc-550">
                         <Truck size={12} /> Envío: {order.shippingMethod === 'express' ? 'Express' : 'Estándar'}
                       </div>
-                      <div className="text-zinc-500">
+                      <div className="text-zinc-550">
                         Dirección: {order.shippingAddress.address}, {order.shippingAddress.city}
                       </div>
                     </div>
@@ -348,7 +494,8 @@ export const AdminDashboard: React.FC = () => {
           { id: 'catalog', label: 'Catálogo', icon: Package },
           { id: 'orders', label: 'Pedidos', icon: ShoppingCart },
           { id: 'users', label: 'Usuarios', icon: Users },
-          { id: 'coupons', label: 'Cupones', icon: Percent }
+          { id: 'coupons', label: 'Cupones', icon: Percent },
+          { id: 'blog', label: 'Blog CMS', icon: BookOpen }
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -450,7 +597,7 @@ export const AdminDashboard: React.FC = () => {
                     <circle cx="18" cy="18" r="15.915" fill="none" stroke="#3b82f6" strokeWidth="3.5" strokeDasharray="25 100" strokeDashoffset="85" />
                     <circle cx="18" cy="18" r="15.915" fill="none" stroke="#eab308" strokeWidth="3.5" strokeDasharray="15 100" strokeDashoffset="110" />
                   </svg>
-                  <div className="space-y-2.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                  <div className="space-y-2.5 text-[10px] font-bold text-zinc-450 uppercase tracking-wider">
                     <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-accent-500" /> Audio (60%)</div>
                     <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-blue-500" /> Moda (25%)</div>
                     <div className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full bg-yellow-500" /> Accesorios (15%)</div>
@@ -458,78 +605,219 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {/* CMS - DEAL OF THE DAY CONFIGURATION */}
+            <div className="glass border border-white/5 p-6 rounded-3xl space-y-6">
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                  <Settings size={16} className="text-accent-500" /> Ajustes: Oferta del Día en Portada
+                </h3>
+                <p className="text-xs text-zinc-550 mt-1">Configura cuál producto se muestra en la sección destacada de ofertas y su descuento.</p>
+              </div>
+
+              <form onSubmit={handleSaveDealSettings} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                <div>
+                  <label className="checkout-label">Producto en Oferta</label>
+                  <select
+                    value={dealProdId}
+                    onChange={(e) => setDealProdId(e.target.value)}
+                    className="checkout-input py-2.5"
+                  >
+                    {products.map(p => (
+                      <option key={p.id} value={p.id}>{p.name} (SKU: {p.id})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="checkout-label">Tasa de Descuento (%)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="99"
+                    value={dealDiscount}
+                    onChange={(e) => setDealDiscount(Math.max(1, Math.min(99, parseInt(e.target.value))))}
+                    className="checkout-input py-2.5"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="py-3 bg-accent-600 hover:bg-accent-500 text-xs font-bold text-white rounded-xl transition-all shadow-lg shadow-accent-600/10 h-11"
+                >
+                  Guardar Configuración de Oferta
+                </button>
+              </form>
+            </div>
           </div>
         )}
 
         {/* CATALOG TAB */}
         {activeTab === 'catalog' && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-widest">Catálogo de Productos</h3>
-                <p className="text-xs text-zinc-550 mt-1">Gestiona descripciones, variantes, precios y el inventario disponible.</p>
+          <div className="space-y-12">
+            
+            {/* Products catalog list */}
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest">Catálogo de Productos</h3>
+                  <p className="text-xs text-zinc-550 mt-1">Gestiona descripciones, variantes, precios y el inventario disponible.</p>
+                </div>
+                <button
+                  onClick={() => setIsAddingProduct(true)}
+                  className="py-2.5 px-4 bg-accent-600 hover:bg-accent-500 text-xs font-bold text-white rounded-xl flex items-center gap-1.5 transition-all shadow-lg shadow-accent-600/15"
+                >
+                  <Plus size={14} /> Nuevo Producto
+                </button>
               </div>
-              <button
-                onClick={() => setIsAddingProduct(true)}
-                className="py-2.5 px-4 bg-accent-600 hover:bg-accent-500 text-xs font-bold text-white rounded-xl flex items-center gap-1.5 transition-all shadow-lg shadow-accent-600/15"
-              >
-                <Plus size={14} /> Nuevo Producto
-              </button>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {products.map((product) => {
-                const totalStock = Object.values(product.stock).reduce((a, b) => a + b, 0);
-                const isCriticallyLow = Object.values(product.stock).some(qty => qty <= 5);
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {products.map((product) => {
+                  const totalStock = Object.values(product.stock).reduce((a, b) => a + b, 0);
+                  const isCriticallyLow = Object.values(product.stock).some(qty => qty <= 5);
 
-                return (
-                  <div key={product.id} className="p-4.5 border border-zinc-900 bg-zinc-950/25 rounded-2xl flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <img src={product.images[0]} alt={product.name} className="w-12 h-12 object-cover rounded-xl bg-zinc-900 shrink-0" />
-                      <div className="min-w-0">
-                        <h4 className="text-xs font-bold text-zinc-200 truncate max-w-[180px]">{product.name}</h4>
-                        <p className="text-[10px] text-zinc-500 font-semibold mt-1">
-                          Cat: {product.category} | SKU: <span className="font-mono text-zinc-400">{product.id}</span>
-                        </p>
-                        <div className="mt-1.5 flex gap-2">
-                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
-                            isCriticallyLow 
-                              ? 'bg-amber-500/10 text-amber-500 border border-amber-500/10' 
-                              : 'bg-zinc-800 text-zinc-400'
-                          }`}>
-                            Stock: {totalStock} uds
-                          </span>
+                  return (
+                    <div key={product.id} className="p-4.5 border border-zinc-900 bg-zinc-950/25 rounded-2xl flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <img src={product.images[0]} alt={product.name} className="w-12 h-12 object-cover rounded-xl bg-zinc-900 shrink-0" />
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-zinc-200 truncate max-w-[180px]">{product.name}</h4>
+                          <p className="text-[10px] text-zinc-500 font-semibold mt-1">
+                            Cat: {product.category} | SKU: <span className="font-mono text-zinc-400">{product.id}</span>
+                          </p>
+                          <div className="mt-1.5 flex gap-2">
+                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
+                              isCriticallyLow 
+                                ? 'bg-amber-500/10 text-amber-500 border border-amber-500/10' 
+                                : 'bg-zinc-800 text-zinc-400'
+                            }`}>
+                              Stock: {totalStock} uds
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 shrink-0">
+                        <div className="text-right">
+                          <div className="text-xs font-black text-white">S/. {product.price}</div>
+                          {product.originalPrice && (
+                            <div className="text-[9px] text-zinc-500 line-through mt-0.5">S/. {product.originalPrice}</div>
+                          )}
+                        </div>
+                        <div className="flex gap-1.5">
+                          <button
+                            onClick={() => handleStartEditProduct(product)}
+                            className="p-2 border border-zinc-800 hover:border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 rounded-xl text-zinc-450 hover:text-white transition-colors"
+                            title="Editar Ficha"
+                          >
+                            <Edit3 size={13} />
+                          </button>
+                          <button
+                            onClick={() => deleteProduct(product.id)}
+                            className="p-2 border border-zinc-905 hover:border-rose-950 bg-zinc-900/60 hover:bg-rose-950/20 rounded-xl text-zinc-500 hover:text-rose-500 transition-colors"
+                            title="Eliminar"
+                          >
+                            <Trash2 size={13} />
+                          </button>
                         </div>
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+            </div>
 
-                    <div className="flex items-center gap-4 shrink-0">
-                      <div className="text-right">
-                        <div className="text-xs font-black text-white">S/. {product.price}</div>
-                        {product.originalPrice && (
-                          <div className="text-[9px] text-zinc-500 line-through mt-0.5">S/. {product.originalPrice}</div>
-                        )}
+            {/* CMS - COLLECTIONS / CATEGORIES MANAGER */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 border-t border-zinc-900 pt-10">
+              
+              {/* Left Column: List existing collections */}
+              <div className="lg:col-span-7 glass border border-white/5 p-6 rounded-3xl space-y-6">
+                <div>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                    <Tag size={16} className="text-accent-500" /> Colecciones Habilitadas (CMS)
+                  </h3>
+                  <p className="text-xs text-zinc-550 mt-1">Configura portadas, descripciones y categorías para la página de Colecciones.</p>
+                </div>
+
+                <div className="space-y-4 max-h-[350px] overflow-y-auto pr-1">
+                  {collections.map((col) => (
+                    <div key={col.id} className="p-3 border border-zinc-900 bg-zinc-950/20 rounded-2xl flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        <img src={col.imageUrl} alt={col.name} className="w-10 h-10 object-cover rounded-lg bg-zinc-900 shrink-0" />
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-zinc-200">{col.name}</h4>
+                          <p className="text-[10px] text-zinc-500 truncate max-w-[280px] mt-0.5">{col.description}</p>
+                        </div>
                       </div>
-                      <div className="flex gap-1.5">
+                      <div className="flex gap-1.5 shrink-0">
                         <button
-                          onClick={() => handleStartEditProduct(product)}
-                          className="p-2 border border-zinc-800 hover:border-zinc-700 bg-zinc-900/60 hover:bg-zinc-900 rounded-xl text-zinc-450 hover:text-white transition-colors"
-                          title="Editar Ficha"
+                          onClick={() => handleStartEditCollection(col)}
+                          className="p-1.5 border border-zinc-800 hover:border-zinc-700 bg-zinc-900 rounded text-zinc-400 hover:text-white transition-colors"
+                          title="Editar"
                         >
-                          <Edit3 size={13} />
+                          <Edit3 size={12} />
                         </button>
                         <button
-                          onClick={() => deleteProduct(product.id)}
-                          className="p-2 border border-zinc-905 hover:border-rose-950 bg-zinc-900/60 hover:bg-rose-950/20 rounded-xl text-zinc-500 hover:text-rose-500 transition-colors"
+                          onClick={() => deleteCollection(col.id)}
+                          className="p-1.5 border border-zinc-800 hover:border-rose-950 bg-zinc-900 hover:bg-rose-950/20 rounded text-zinc-500 hover:text-rose-500 transition-colors"
                           title="Eliminar"
                         >
-                          <Trash2 size={13} />
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right Column: Create Collection Form */}
+              <div className="lg:col-span-5 glass border border-white/5 p-6 rounded-3xl space-y-6 h-fit">
+                <div>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
+                    <Plus size={16} className="text-accent-500" /> Crear Nueva Colección
+                  </h3>
+                  <p className="text-xs text-zinc-550 mt-1">Añade una categoría con portada al catálogo.</p>
+                </div>
+
+                <form onSubmit={handleCreateCollection} className="space-y-4">
+                  <div>
+                    <label className="checkout-label">Nombre de Colección / Categoría</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="ej: Wearables"
+                      value={newColName}
+                      onChange={(e) => setNewColName(e.target.value)}
+                      className="checkout-input py-2 px-3"
+                    />
                   </div>
-                );
-              })}
+                  <div>
+                    <label className="checkout-label">Descripción</label>
+                    <textarea
+                      rows={2}
+                      placeholder="ej: Dispositivos inteligentes para seguimiento..."
+                      value={newColDesc}
+                      onChange={(e) => setNewColDesc(e.target.value)}
+                      className="checkout-input py-2 px-3 resize-none text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="checkout-label">Imagen de Portada (URL)</label>
+                    <input
+                      type="text"
+                      placeholder="URL de la imagen"
+                      value={newColImg}
+                      onChange={(e) => setNewColImg(e.target.value)}
+                      className="checkout-input py-2 px-3 text-xs"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-2.5 bg-accent-600 hover:bg-accent-500 text-xs font-bold text-white rounded-xl transition-all shadow-lg shadow-accent-600/10"
+                  >
+                    Crear Colección
+                  </button>
+                </form>
+              </div>
+
             </div>
           </div>
         )}
@@ -695,7 +983,7 @@ export const AdminDashboard: React.FC = () => {
 
                       <button
                         onClick={() => deleteCoupon(cp.code)}
-                        className="text-zinc-550 hover:text-rose-500 p-0.5 transition-colors"
+                        className="text-zinc-555 hover:text-rose-500 p-0.5 transition-colors"
                         title="Borrar Cupón"
                       >
                         <Trash2 size={13} />
@@ -746,6 +1034,129 @@ export const AdminDashboard: React.FC = () => {
                 </button>
               </form>
             </div>
+          </div>
+        )}
+
+        {/* CMS BLOG TAB */}
+        {activeTab === 'blog' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            {/* Left Column: Articles List */}
+            <div className="lg:col-span-7 glass border border-white/5 p-6 rounded-3xl space-y-6">
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-2">
+                  <BookOpen size={16} className="text-accent-500" /> Entradas del Blog CMS
+                </h3>
+                <p className="text-xs text-zinc-550 mt-1">Agrega y edita noticias de estilo y lanzamientos técnicos.</p>
+              </div>
+
+              {articles.length === 0 ? (
+                <p className="text-xs text-zinc-500 italic py-4">No hay artículos publicados en el blog todavía.</p>
+              ) : (
+                <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                  {articles.map((art) => (
+                    <div key={art.id} className="p-4 border border-zinc-900 bg-zinc-950/20 rounded-2xl flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3.5 min-w-0">
+                        {art.image && (
+                          <img src={art.image} alt={art.title} className="w-12 h-12 object-cover rounded-xl bg-zinc-900 shrink-0" />
+                        )}
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-zinc-200 truncate max-w-[240px]">{art.title}</h4>
+                          <p className="text-[10px] text-zinc-500 mt-1">Fecha: {art.date} | Lectura: {art.readTime}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-1.5 shrink-0">
+                        <button
+                          onClick={() => handleStartEditArticle(art)}
+                          className="p-2 border border-zinc-800 hover:border-zinc-700 bg-zinc-900 rounded-xl text-zinc-400 hover:text-white transition-colors"
+                          title="Editar Ficha"
+                        >
+                          <Edit3 size={13} />
+                        </button>
+                        <button
+                          onClick={() => deleteArticle(art.id)}
+                          className="p-2 border border-zinc-800 hover:border-rose-950 bg-zinc-900 hover:bg-rose-950/20 rounded-xl text-zinc-500 hover:text-rose-500 transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Right Column: New Article Form */}
+            <div className="lg:col-span-5 glass border border-white/5 p-6 rounded-3xl space-y-6 h-fit">
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-widest flex items-center gap-1.5">
+                  <Plus size={16} className="text-accent-500" /> Publicar Nuevo Artículo
+                </h3>
+                <p className="text-xs text-zinc-550 mt-1">Publica contenido de tendencia en el blog de la tienda.</p>
+              </div>
+
+              <form onSubmit={handleCreateArticle} className="space-y-4">
+                <div>
+                  <label className="checkout-label">Título del Artículo</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="ej: Lanzamiento VIBE Buds 2026"
+                    value={newArtTitle}
+                    onChange={(e) => setNewArtTitle(e.target.value)}
+                    className="checkout-input py-2 px-3"
+                  />
+                </div>
+                <div>
+                  <label className="checkout-label">Extracto Breve</label>
+                  <input
+                    type="text"
+                    placeholder="Resumen del artículo..."
+                    value={newArtExcerpt}
+                    onChange={(e) => setNewArtExcerpt(e.target.value)}
+                    className="checkout-input py-2 px-3 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="checkout-label">Tiempo de Lectura (ej: 4 min)</label>
+                  <input
+                    type="text"
+                    value={newArtReadTime}
+                    onChange={(e) => setNewArtReadTime(e.target.value)}
+                    className="checkout-input py-2 px-3 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="checkout-label">Imagen de Portada (URL)</label>
+                  <input
+                    type="text"
+                    value={newArtImg}
+                    onChange={(e) => setNewArtImg(e.target.value)}
+                    className="checkout-input py-2 px-3 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="checkout-label">Contenido del Artículo</label>
+                  <textarea
+                    rows={4}
+                    required
+                    placeholder="Escribe el artículo aquí..."
+                    value={newArtContent}
+                    onChange={(e) => setNewArtContent(e.target.value)}
+                    className="checkout-input py-2 px-3 resize-none text-xs"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-accent-600 hover:bg-accent-500 text-xs font-bold text-white rounded-xl transition-all shadow-lg shadow-accent-600/10"
+                >
+                  Publicar Entrada
+                </button>
+              </form>
+            </div>
+
           </div>
         )}
       </div>
@@ -829,7 +1240,7 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <div className="border-t border-zinc-900 pt-4 space-y-2">
-                  <span className="text-[10px] text-zinc-550 font-bold uppercase tracking-wider">Inventario por Variantes:</span>
+                  <span className="text-[10px] text-zinc-555 font-bold uppercase tracking-wider">Inventario por Variantes:</span>
                   <div className="space-y-2.5">
                     {Object.entries(editProdStock).map(([key, qty]) => (
                       <div key={key} className="flex justify-between items-center gap-4 text-xs font-semibold">
@@ -882,7 +1293,7 @@ export const AdminDashboard: React.FC = () => {
                 </h3>
                 <button
                   onClick={() => setIsAddingProduct(false)}
-                  className="text-zinc-550 hover:text-white p-1 transition-colors"
+                  className="text-zinc-555 hover:text-white p-1 transition-colors"
                 >
                   <X size={18} />
                 </button>
@@ -967,6 +1378,166 @@ export const AdminDashboard: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsAddingProduct(false)}
+                    className="px-4.5 py-3 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-xs font-bold text-zinc-400 rounded-xl"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- SECTION: EDIT COLLECTION MODAL --- */}
+      <AnimatePresence>
+        {selectedCollectionForEdit && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="glass border border-white/5 max-w-md w-full rounded-3xl p-6.5 max-h-[90vh] overflow-y-auto space-y-6"
+            >
+              <div className="flex justify-between items-center pb-2 border-b border-zinc-900">
+                <h3 className="text-sm font-bold text-white uppercase tracking-widest">Editar Colección</h3>
+                <button
+                  onClick={() => setSelectedCollectionForEdit(null)}
+                  className="text-zinc-555 hover:text-white p-1 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveCollectionEdits} className="space-y-4">
+                <div>
+                  <label className="checkout-label">Nombre de Colección</label>
+                  <input
+                    type="text"
+                    required
+                    value={editColName}
+                    onChange={(e) => setEditColName(e.target.value)}
+                    className="checkout-input py-2 px-3"
+                  />
+                </div>
+                <div>
+                  <label className="checkout-label">Descripción</label>
+                  <textarea
+                    rows={2}
+                    value={editColDesc}
+                    onChange={(e) => setEditColDesc(e.target.value)}
+                    className="checkout-input py-2 px-3 resize-none text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="checkout-label">Imagen de Portada (URL)</label>
+                  <input
+                    type="text"
+                    required
+                    value={editColImg}
+                    onChange={(e) => setEditColImg(e.target.value)}
+                    className="checkout-input py-2 px-3 text-xs"
+                  />
+                </div>
+                <div className="flex gap-3 pt-3">
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-accent-600 hover:bg-accent-500 text-xs font-bold text-white rounded-xl transition-all"
+                  >
+                    Guardar Cambios
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCollectionForEdit(null)}
+                    className="px-4.5 py-3 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-xs font-bold text-zinc-400 rounded-xl"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- SECTION: EDIT ARTICLE MODAL --- */}
+      <AnimatePresence>
+        {selectedArticleForEdit && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="glass border border-white/5 max-w-lg w-full rounded-3xl p-6.5 max-h-[90vh] overflow-y-auto space-y-6"
+            >
+              <div className="flex justify-between items-center pb-2 border-b border-zinc-900">
+                <h3 className="text-sm font-bold text-white uppercase tracking-widest">Editar Artículo</h3>
+                <button
+                  onClick={() => setSelectedArticleForEdit(null)}
+                  className="text-zinc-555 hover:text-white p-1 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveArticleEdits} className="space-y-4">
+                <div>
+                  <label className="checkout-label">Título del Artículo</label>
+                  <input
+                    type="text"
+                    required
+                    value={editArtTitle}
+                    onChange={(e) => setEditArtTitle(e.target.value)}
+                    className="checkout-input py-2 px-3"
+                  />
+                </div>
+                <div>
+                  <label className="checkout-label">Extracto Breve</label>
+                  <input
+                    type="text"
+                    value={editArtExcerpt}
+                    onChange={(e) => setEditArtExcerpt(e.target.value)}
+                    className="checkout-input py-2 px-3 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="checkout-label">Tiempo de Lectura</label>
+                  <input
+                    type="text"
+                    value={editArtReadTime}
+                    onChange={(e) => setEditArtReadTime(e.target.value)}
+                    className="checkout-input py-2 px-3 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="checkout-label">Imagen de Portada (URL)</label>
+                  <input
+                    type="text"
+                    value={editArtImg}
+                    onChange={(e) => setEditArtImg(e.target.value)}
+                    className="checkout-input py-2 px-3 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="checkout-label">Contenido del Artículo</label>
+                  <textarea
+                    rows={6}
+                    required
+                    value={editArtContent}
+                    onChange={(e) => setEditArtContent(e.target.value)}
+                    className="checkout-input py-2 px-3 resize-none text-xs"
+                  />
+                </div>
+                <div className="flex gap-3 pt-3">
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-accent-600 hover:bg-accent-500 text-xs font-bold text-white rounded-xl transition-all"
+                  >
+                    Guardar Cambios
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedArticleForEdit(null)}
                     className="px-4.5 py-3 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-xs font-bold text-zinc-400 rounded-xl"
                   >
                     Cancelar

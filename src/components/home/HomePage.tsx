@@ -4,7 +4,7 @@ import { ShoppingBag, ArrowRight, ShieldCheck, Truck, RefreshCw, Zap, Star, Flam
 import { motion } from 'framer-motion';
 
 export const HomePage: React.FC = () => {
-  const { products, setActiveView, setFilterCategory, setSelectedProductId, addToCart, setCartDrawerOpen } = useStore();
+  const { products, setActiveView, setFilterCategory, setSelectedProductId, addToCart, setCartDrawerOpen, dealSettings } = useStore();
   const [timeLeft, setTimeLeft] = useState({ hours: 14, minutes: 32, seconds: 45 });
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
@@ -38,6 +38,11 @@ export const HomePage: React.FC = () => {
   }, []);
 
   const trendingProducts = products.slice(0, 4); // Show 4 premium cards instead of 3 for a better grid layout
+  
+  const dealProduct = products.find(p => p.id === dealSettings.productId) || products[0];
+  const dealDiscount = dealSettings.discountRate || 0.20;
+  const dealDiscountPercent = Math.round(dealDiscount * 100);
+  const discountedPrice = dealProduct ? Math.round(dealProduct.price * (1 - dealDiscount)) : 249;
   
   const handleCollectionClick = (catName: string) => {
     setFilterCategory(catName);
@@ -293,12 +298,12 @@ export const HomePage: React.FC = () => {
             </div>
             
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-none">
-              SoundAura Pro Wireless <br />
-              <span className="bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent">Descuento Exclusivo del 20%</span>
+              {dealProduct?.name} <br />
+              <span className="bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent">Descuento Exclusivo del {dealDiscountPercent}%</span>
             </h2>
             
             <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-lg">
-              Equipados con transductores híbridos de nivel audiófilo y cancelación activa de ruido adaptable. Una oferta de stock limitado que no se repetirá.
+              {dealProduct?.description}
             </p>
 
             {/* Countdown timers */}
@@ -340,10 +345,10 @@ export const HomePage: React.FC = () => {
 
             <div className="pt-2">
               <button
-                onClick={() => handleProductClick('prod-001')}
+                onClick={() => handleProductClick(dealProduct?.id)}
                 className="px-8 py-4 rounded-xl bg-white text-black hover:bg-zinc-200 text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 hover:shadow-xl hover:shadow-white/10"
               >
-                <span>Comprar por S/. 249.00</span>
+                <span>Comprar por S/. {discountedPrice}.00</span>
                 <ArrowRight size={14} />
               </button>
             </div>
@@ -352,8 +357,8 @@ export const HomePage: React.FC = () => {
           {/* Right Column: Hero image */}
           <div className="lg:col-span-5 aspect-square rounded-2xl overflow-hidden bg-zinc-900 border border-white/5 shadow-2xl relative group">
             <img 
-              src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80" 
-              alt="SoundAura Pro" 
+              src={dealProduct?.images[0]} 
+              alt={dealProduct?.name} 
               className="w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-103" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />

@@ -45,7 +45,10 @@ export const App: React.FC = () => {
     fetchProducts,
     fetchCoupons,
     fetchOrders,
-    checkSession
+    checkSession,
+    fetchArticles,
+    fetchCollections,
+    fetchDealSettings
   } = useStore();
 
   // Trigger auto-build after Git repo linkage
@@ -59,7 +62,10 @@ export const App: React.FC = () => {
     fetchProducts();
     fetchCoupons();
     fetchOrders();
-  }, [checkSession, fetchProducts, fetchCoupons, fetchOrders]);
+    fetchArticles();
+    fetchCollections();
+    fetchDealSettings();
+  }, [checkSession, fetchProducts, fetchCoupons, fetchOrders, fetchArticles, fetchCollections, fetchDealSettings]);
 
   // Auto-dismiss toast
   React.useEffect(() => {

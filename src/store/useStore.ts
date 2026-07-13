@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Product, CartItem, Order, User, ShippingAddress, ProductColor, Article, Coupon, ActiveView } from '../types/store';
+import type { Product, CartItem, Order, User, ShippingAddress, ProductColor, Article, Coupon, ActiveView, Collection, DealSettings } from '../types/store';
 import { mockProducts, mockUser } from '../data/mockData';
 import { supabase } from '../lib/supabaseClient';
 
@@ -50,6 +50,8 @@ interface StoreState {
   recentlyViewed: string[];
   isLoggedIn: boolean;
   allUsers: User[];
+  collections: Collection[];
+  dealSettings: DealSettings;
 
   setProducts: (products: Product[]) => void;
   updateProductStock: (productId: string, variantKey: string, newStock: number) => void;
@@ -105,6 +107,16 @@ interface StoreState {
   fetchAllUsers: () => Promise<void>;
   updateUserRole: (email: string, role: 'admin' | 'customer') => Promise<void>;
   updateProductDetails: (productId: string, updatedProduct: Partial<Product>) => Promise<void>;
+  fetchArticles: () => Promise<void>;
+  addArticle: (article: Article) => Promise<void>;
+  deleteArticle: (id: string) => Promise<void>;
+  updateArticle: (id: string, updated: Partial<Article>) => Promise<void>;
+  fetchCollections: () => Promise<void>;
+  addCollection: (collection: Collection) => Promise<void>;
+  deleteCollection: (id: string) => Promise<void>;
+  updateCollection: (id: string, updated: Partial<Collection>) => Promise<void>;
+  fetchDealSettings: () => Promise<void>;
+  updateDealSettings: (productId: string, discountRate: number) => Promise<void>;
 }
 
 export const useStore = create<StoreState>()(
@@ -184,6 +196,8 @@ export const useStore = create<StoreState>()(
   recentlyViewed: [],
   isLoggedIn: false,
   allUsers: [],
+  collections: [],
+  dealSettings: { productId: 'prod-001', discountRate: 0.20 },
 
   setProducts: (products) => set({ products }),
   
@@ -768,6 +782,164 @@ export const useStore = create<StoreState>()(
           if (error) throw error;
         } catch (err) {
           console.error('Error updating product details:', err);
+        }
+      },
+
+      fetchArticles: async () => {
+        try {
+          const { data, error } = await supabase.from('articles').select('*');
+          if (error) throw error;
+          if (data && data.length > 0) {
+            const mapped = data.map((a: any) => ({
+              id: a.id,
+              title: a.title,
+              excerpt: a.excerpt,
+              content: a.content,
+              image: a.image,
+              date: a.date,
+              readTime: a.read_time
+            }));
+            set({ articles: mapped });
+          }
+        } catch (err) {
+          console.error('Error fetching articles:', err);
+        }
+      },
+
+      addArticle: async (article) => {
+        set((state) => ({ articles: [article, ...state.articles] }));
+        try {
+          const { error } = await supabase.from('articles').insert({
+            id: article.id,
+            title: article.title,
+            excerpt: article.excerpt,
+            content: article.content,
+            image: article.image,
+            date: article.date,
+            read_time: article.readTime
+          });
+          if (error) throw error;
+        } catch (err) {
+          console.error('Error adding article:', err);
+        }
+      },
+
+      deleteArticle: async (id) => {
+        set((state) => ({ articles: state.articles.filter((a) => a.id !== id) }));
+        try {
+          const { error } = await supabase.from('articles').delete().eq('id', id);
+          if (error) throw error;
+        } catch (err) {
+          console.error('Error deleting article:', err);
+        }
+      },
+
+      updateArticle: async (id, updated) => {
+        set((state) => ({
+          articles: state.articles.map((a) => a.id === id ? { ...a, ...updated } : a)
+        }));
+        try {
+          const { error } = await supabase
+            .from('articles')
+            .update({
+              title: updated.title,
+              excerpt: updated.excerpt,
+              content: updated.content,
+              image: updated.image,
+              date: updated.date,
+              read_time: updated.readTime
+            })
+            .eq('id', id);
+          if (error) throw error;
+        } catch (err) {
+          console.error('Error updating article:', err);
+        }
+      },
+
+      fetchCollections: async () => {
+        try {
+          const { data, error } = await supabase.from('collections').select('*');
+          if (error) throw error;
+          if (data && data.length > 0) {
+            const mapped = data.map((c: any) => ({
+              id: c.id,
+              name: c.name,
+              description: c.description,
+              imageUrl: c.image_url
+            }));
+            set({ collections: mapped });
+          }
+        } catch (err) {
+          console.error('Error fetching collections:', err);
+        }
+      },
+
+      addCollection: async (collection) => {
+        set((state) => ({ collections: [collection, ...state.collections] }));
+        try {
+          const { error } = await supabase.from('collections').insert({
+            id: collection.id,
+            name: collection.name,
+            description: collection.description,
+            image_url: collection.imageUrl
+          });
+          if (error) throw error;
+        } catch (err) {
+          console.error('Error adding collection:', err);
+        }
+      },
+
+      deleteCollection: async (id) => {
+        set((state) => ({ collections: state.collections.filter((c) => c.id !== id) }));
+        try {
+          const { error } = await supabase.from('collections').delete().eq('id', id);
+          if (error) throw error;
+        } catch (err) {
+          console.error('Error deleting collection:', err);
+        }
+      },
+
+      updateCollection: async (id, updated) => {
+        set((state) => ({
+          collections: state.collections.map((c) => c.id === id ? { ...c, ...updated } : c)
+        }));
+        try {
+          const { error } = await supabase
+            .from('collections')
+            .update({
+              name: updated.name,
+              description: updated.description,
+              image_url: updated.imageUrl
+            })
+            .eq('id', id);
+          if (error) throw error;
+        } catch (err) {
+          console.error('Error updating collection:', err);
+        }
+      },
+
+      fetchDealSettings: async () => {
+        try {
+          const { data, error } = await supabase.from('settings').select('*').eq('key', 'deal_of_the_day').maybeSingle();
+          if (error) throw error;
+          if (data && data.value) {
+            set({ dealSettings: data.value });
+          }
+        } catch (err) {
+          console.error('Error fetching deal settings:', err);
+        }
+      },
+
+      updateDealSettings: async (productId, discountRate) => {
+        const nextValue = { productId, discountRate };
+        set({ dealSettings: nextValue });
+        try {
+          const { error } = await supabase
+            .from('settings')
+            .upsert({ key: 'deal_of_the_day', value: nextValue });
+          if (error) throw error;
+        } catch (err) {
+          console.error('Error updating deal settings:', err);
         }
       },
     }),
